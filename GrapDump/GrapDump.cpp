@@ -17,14 +17,22 @@
 #include "tiny_obj_loader.h"
 
 float
-    x_mod = 0,
-    y_mod = 1,
-    z_mod = 0,
-    a_mod = 0
+    x_mov = 0,
+    y_mov = 0,
+    x_rot = 0,
+    y_rot = 0,
+    s_scale = 1,
+    z_zoom = 0
 ;
 
+float
+    window_height = 640,
+    window_width = 640
+;
+
+void compileShaderProgram(GLuint shaderProg, GLuint vertShader, GLuint fragShader);
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void drawPentagon(float centerX, float centerY, float radius, float phaseDegrees);
 
 int main(void)
 {
@@ -54,7 +62,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 640, "Josiah Aviso", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "Josiah Aviso", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -66,6 +74,15 @@ int main(void)
 
     /* Initializations */
     gladLoadGL();
+
+    /*Renders model with reference to an imaginary window with reference to the actul window
+    glViewport(
+        0,      // Minimum x
+        0,      // Minimum y
+        1200,    // Max x, width
+        600     // Max y, height
+    );
+    */
 
     // Assign Key Callback Function to the current window
     glfwSetKeyCallback(window, keyCallback);
@@ -186,6 +203,22 @@ int main(void)
 
     // Reset so the model isnt accidentally edited
 
+    // Matrix to modify the projection style
+    glm::mat4 orthProjectionMatrix = glm::ortho(
+        -2.f,   // Leftmost Point
+        2.f,    // Rightmost Point
+        -2.f,   // Bottom Point
+        2.f,    // Top Point
+        -1.f,   // Znear
+        1.f     // Zfar
+    );
+
+    glm::mat4 projectionMatrix = glm::perspective(
+        glm::radians(100.f), // FOV
+        window_height / window_width, // aspect ratio
+        0.1f, //Znear > 0
+        100.f //Zfar
+    );
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -209,23 +242,35 @@ int main(void)
         // Translate
         glm::mat4 transformMat = glm::translate(
             identityMat4,
-            glm::vec3(z_mod, a_mod, 0.f)
+            glm::vec3(x_mov, y_mov, z_zoom)
         );
 
         // Scale
         transformMat = glm::scale(
             transformMat,
-            glm::vec3(y_mod, y_mod, y_mod)
+            glm::vec3(s_scale, s_scale, s_scale)
         );
 
-        // Rotate
+        // RotateX
         transformMat = glm::rotate(
             transformMat,
-            glm::radians(x_mod),
+            glm::radians(x_rot),
             glm::normalize(
                 glm::vec3(0.f, 1.f, 0.f)
             )
         );
+
+        // RotateY
+        transformMat = glm::rotate(
+            transformMat,
+            glm::radians(y_rot),
+            glm::normalize(
+                glm::vec3(-1.f, 0.f, 0.f)
+            )
+        );
+
+        unsigned int projectionLoc = glGetUniformLocation(shaderProg, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
         // Get the transform matrix in the vertex shader and assign the transformMat here
         unsigned int transformLoc = glGetUniformLocation(shaderProg, "transform");
@@ -275,27 +320,10 @@ int main(void)
     return 0;
 }
 
-void drawPentagon(float centerX, float centerY, float radius, float phaseDegrees) {
-   
-    float phaseRadians = phaseDegrees * M_PI / 180;
-    
-    glBegin(GL_POLYGON);
-    // Window coords are -1.0 to 1.0
-    // Order matters *sequential
-   
-    for (int i = 0; i < 5; i++) {
-        float 
-            angle = phaseRadians + i * 2 * M_PI / 5 ;
+void compileShaderProgram(GLuint shaderProg, GLuint vertShader, GLuint fragShader) {
 
-        float 
-            pointX = radius * cos(angle) + centerX,
-            pointY = radius * sin(angle) + centerY;
-        
-        glVertex2f(pointX, pointY);
-    }
 
-    glEnd();
-}
+};
 
 void keyCallback(
     GLFWwindow* window,     // Pointer to the window being checked
@@ -305,22 +333,35 @@ void keyCallback(
     int mods                // Which modifier keys are held (like Shift, Ctrl, Alt, etc.)
 ) 
 {
-  
-    if (key == GLFW_KEY_D && mods == GLFW_MOD_SHIFT)
-        x_mod += 15.f;
-    if (key == GLFW_KEY_A && mods == GLFW_MOD_SHIFT)
-        x_mod -= 15.f;
-    if (key == GLFW_KEY_W && mods == GLFW_MOD_SHIFT)
-        y_mod += 0.1f;
-    if (key == GLFW_KEY_S && mods == GLFW_MOD_SHIFT)
-        y_mod -= 0.1f;
+    if (action == GLFW_RELEASE)
+        return;
 
-    if (key == GLFW_KEY_D && mods != GLFW_MOD_SHIFT)
-        z_mod += 0.05f;
-    if (key == GLFW_KEY_A && mods != GLFW_MOD_SHIFT)
-        z_mod -= 0.05f;
-    if (key == GLFW_KEY_W && mods != GLFW_MOD_SHIFT)
-        a_mod += 0.05f;
-    if (key == GLFW_KEY_S && mods != GLFW_MOD_SHIFT)
-        a_mod -= 0.05f;
+    if (key == GLFW_KEY_W && action != GLFW_RELEASE)
+        y_mov += 0.02;
+    if (key == GLFW_KEY_A && action != GLFW_RELEASE)
+        x_mov -= 0.02;
+    if (key == GLFW_KEY_S && action != GLFW_RELEASE)
+        y_mov -= 0.02;
+    if (key == GLFW_KEY_D && action != GLFW_RELEASE)
+        x_mov += 0.02;
+
+    if (key == GLFW_KEY_UP && action != GLFW_RELEASE)
+        y_rot += 5;
+    if (key == GLFW_KEY_DOWN && action != GLFW_RELEASE)
+        y_rot -= 5;
+    if (key == GLFW_KEY_LEFT && action != GLFW_RELEASE)
+        x_rot -= 5;
+    if (key == GLFW_KEY_RIGHT && action != GLFW_RELEASE)
+        x_rot += 5;
+
+    if (key == GLFW_KEY_Q && action != GLFW_RELEASE)
+        s_scale -= 0.02;
+    if (key == GLFW_KEY_E && action != GLFW_RELEASE)
+        s_scale += 0.02;
+
+    if (key == GLFW_KEY_Z && action != GLFW_RELEASE)
+        z_zoom += 0.02;
+    if (key == GLFW_KEY_X && action != GLFW_RELEASE)
+        z_zoom -= 0.02;
+
 }
