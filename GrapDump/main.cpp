@@ -17,12 +17,12 @@
 #include "tiny_obj_loader.h"
 
 float
-    x_mov = 0,
-    y_mov = 0,
-    x_rot = 0,
-    y_rot = 0,
-    s_scale = 1,
-    z_zoom = 0
+    x_mov = 0.f,
+    y_mov = 0.f,
+    x_rot = 0.f,
+    y_rot = 0.f,
+    s_scale = 1.f,
+    z_zoom = -0.5f
 ;
 
 float
