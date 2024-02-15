@@ -1,11 +1,6 @@
 
 #version 330 core
 
-// Start Texture Stuff
-// UV Data is at index 2
-layout(location = 2) in vec2 aTex;
-out vec2 texCoord; // output to the frag shader
-
 // Start Vertex Transform Stuff
 // Gets the data at Attrib in Index 0
 // Converts it and stores it into a vec3 called aPos
@@ -23,7 +18,4 @@ uniform mat4 view ;
 void main () {
 	// gl_Position is predefined variable that stores the final positional data of the the point
 	gl_Position = projection * view * transform * vec4 (aPos, 1.0); // Turns the vec3 into a vec4 for Layering, fixing Z-Fighting, & applies matrix mult for transform
-
-	// sets aTex texture to texCoord which is passed to frag shader
-	texCoord = aTex;
 }
