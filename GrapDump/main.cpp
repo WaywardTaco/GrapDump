@@ -43,7 +43,7 @@ int main(void)
     if (window == NULL)
         return -1;
 
-    models.push_back(new Model("3D/myCube.obj"));
+    models.push_back(new Model("3D/Dragon.obj"));
 
     GLuint shaderProg = compShaderProg("Shader/sample.vert", "Shader/sample.frag");
 
