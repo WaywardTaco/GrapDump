@@ -70,10 +70,11 @@ void Model::setPosition(glm::vec3 position) {
     this->position = position;
 };
 
+void Model::setScale(glm::vec3 scale) {
+    this->scale = scale;
+}
+
 void Model::setRotation(glm::vec3 scale) {
     this->rotation = rotation;
 }
 
-void Model::setScale(glm::vec3 scale) {
-    this->scale = scale;
-}
