@@ -28,4 +28,6 @@ public:
 
     void render(GLuint shaderProgram);
     void setPosition(glm::vec3 position);
+    void setScale(glm::vec3 scale);
+    void setRotation(glm::vec3 rotation);
 };
