@@ -1,222 +1,77 @@
 
-#define _USE_MATH_DEFINES
-#define TINYOBJLOADER_IMPLEMENTATION
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <cmath>
-#include <chrono>
-#include <string>
-#include <iostream>
-
 #include "Model.hpp"
-#include "Camera.hpp"
 
-float
-window_height = 640,
-window_width = 640;
+Model::Model(std::string objectPath) : position(0.f, 0.f, 0.f), scale(1.f, 1.f, 1.f), rotation(0.f, 0.f, 0.f) {
 
-float
-moveSpd = 0.2f,
-rotSpd = 0.02f;
+    this->success = tinyobj::LoadObj(
+        &this->attributes,
+        &this->shapes,
+        &this->material,
+        &this->warning,
+        &this->error,
+        objectPath.c_str()
+    );
 
-float
-cooldown = 0.f,
-timelimit = 3000.f;
-
-float
-mouseX = 0.f,
-mouseY = 0.f;
-
-auto
-start = std::chrono::steady_clock::now(),
-timeElapsed = std::chrono::steady_clock::now();
-
-Camera* camera = new Camera(window_height / window_width);
-std::vector<Model*> models;
-
-GLFWwindow* initGLFW();
-
-GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void cursorCallback(GLFWwindow* window, double xpos, double ypos);
-void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
-
-int main(void)
-{
-    GLFWwindow* window = initGLFW();
-    if (window == NULL)
-        return -1;
-
-    models.push_back(new Model("3D/Dragon.obj"));
-    //This model is from https://free3d.com/3d-model/dragon-46104.html
-    //Sbmitted by timrh in free3D.com
-
-    GLuint shaderProg = compShaderProg("Shader/sample.vert", "Shader/sample.frag");
-
-
-
-    while (!glfwWindowShouldClose(window))
-    {
-        setShaderMat4fv(shaderProg, "view", camera->getView());
-        setShaderMat4fv(shaderProg, "projection", camera->getProjection());
-
-        for (int i = 0; i < models.size(); i++)
-            models[i]->render(shaderProg);
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-        if (cooldown > 0.f) {
-            timeElapsed = std::chrono::steady_clock::now();
-            cooldown = timelimit - (float)std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed - start).count();
-            std::cout << cooldown << std::endl;
-        }
+    for (int i = 0; i < this->shapes[0].mesh.indices.size(); i++) {
+        this->mesh_indices.push_back(this->shapes[0].mesh.indices[i].vertex_index);
     }
 
-    glfwTerminate();
-    return 0;
+    glGenVertexArrays(1, &this->VAO);
+    glGenBuffers(1, &this->VBO);
+    glGenBuffers(1, &this->EBO);
+
+    glBindVertexArray(this->VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT) * this->attributes.vertices.size(), this->attributes.vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    
+    glEnableVertexAttribArray(0); 
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * this->mesh_indices.size(), this->mesh_indices.data(), GL_STATIC_DRAW);
+    
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+};
+
+Model::~Model() {
+    glDeleteVertexArrays(1, &this->VAO);
+    glDeleteBuffers(1, &this->VBO);
+    glDeleteBuffers(1, &this->EBO);
 }
 
-GLFWwindow* initGLFW() {
-    if (!glfwInit())
-        return NULL;
+void Model::render(GLuint shaderProgram) {
 
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Josiah Aviso & Dun Baniqued", NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        return NULL;
-    }
+    glm::mat4 transformMat(1.f);
 
-    glfwMakeContextCurrent(window);
-    gladLoadGL();
-    glfwSetKeyCallback(window, keyCallback);
+    transformMat = glm::rotate(transformMat, glm::radians(this->rotation.x), glm::vec3(1.f,0.f,0.f));
+    transformMat = glm::rotate(transformMat, glm::radians(this->rotation.y), glm::vec3(0.f,1.f,0.f));
+    transformMat = glm::rotate(transformMat, glm::radians(this->rotation.z), glm::vec3(0.f,0.f,1.f));
 
-    if (glfwRawMouseMotionSupported())
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    transformMat = glm::scale(transformMat, this->scale);
+    transformMat = glm::translate(transformMat, this->position);
 
-    glfwSetCursorPosCallback(window, cursorCallback);
+    unsigned int varLoc = glGetUniformLocation(shaderProgram, "transform");
+    glUniformMatrix4fv(varLoc, 1, GL_FALSE, glm::value_ptr(transformMat));
 
-    return window;
+    glUseProgram(shaderProgram);
+    glBindVertexArray(this->VAO);
+    glDrawElements(GL_TRIANGLES, this->mesh_indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 };
 
-GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc) {
-
-    /* Read the Shaders from their source files */
-    std::fstream
-        vertFile(vertShaderSrc),
-        fragFile(fragShaderSrc);
-    std::stringstream
-        vertBuff,
-        fragBuff;
-
-    vertBuff << vertFile.rdbuf();
-    fragBuff << fragFile.rdbuf();
-    std::string
-        vertStr = vertBuff.str(),
-        fragStr = fragBuff.str();
-    const char
-        * v = vertStr.c_str(),
-        * f = fragStr.c_str();
-    GLuint
-        vertexShader = glCreateShader(GL_VERTEX_SHADER),
-        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER),
-        shaderProg = glCreateProgram();
-
-    /* Compile Shaders */
-    glShaderSource(vertexShader, 1, &v, NULL);
-    glShaderSource(fragmentShader, 1, &f, NULL);
-    glCompileShader(vertexShader);
-    glCompileShader(fragmentShader);
-
-    /* Link Vertex and Fragment Shaders for use */
-    glAttachShader(shaderProg, vertexShader);
-    glAttachShader(shaderProg, fragmentShader);
-    glLinkProgram(shaderProg);
-
-    return shaderProg;
+void Model::setPosition(glm::vec3 position) {
+    this->position = position;
 };
 
-void keyCallback(
-    GLFWwindow* window,     // Pointer to the window being checked
-    int key,                // the keycode being pressed
-    int scancode,           // Physical position of the press on keyboard
-    int action,             // Either pressed or released
-    int mods                // Which modifier keys are held (like Shift, Ctrl, Alt, etc.)
-)
-{
-
-    if (action == GLFW_RELEASE)
-        return;
-
-    if (key == GLFW_KEY_SPACE && cooldown <= 0.f) {
-        Model* temp = new Model("3D/Dragon.obj");
-        temp->setPosition(camera->center);
-
-        models.push_back(temp);
-
-        cooldown = timelimit;
-        start = std::chrono::steady_clock::now();
-    }
-
-    if (key == GLFW_KEY_W && action != GLFW_RELEASE) {
-        camera->move({ 0.f, 0.f, -moveSpd });
-        camera->pan({ 0.f, 0.f, -moveSpd });
-    }
-    if (key == GLFW_KEY_A && action != GLFW_RELEASE) {
-        camera->move({ -moveSpd, 0.f, 0.f });
-        camera->pan({ -moveSpd, 0.f, 0.f });
-    }
-    if (key == GLFW_KEY_S && action != GLFW_RELEASE) {
-        camera->move({ 0.f, 0.f, moveSpd });
-        camera->pan({ 0.f, 0.f, moveSpd });
-    }
-    if (key == GLFW_KEY_D && action != GLFW_RELEASE) {
-        camera->move({ moveSpd, 0.f, 0.f });
-        camera->pan({ moveSpd, 0.f, 0.f });
-    }
-    if (key == GLFW_KEY_LEFT_ALT && action != GLFW_RELEASE) {
-        camera->move({ 0.f, moveSpd, 0.f });
-        camera->pan({ 0.f, moveSpd, 0.f });
-    }
-    if (key == GLFW_KEY_LEFT_SHIFT && action != GLFW_RELEASE) {
-        camera->move({ 0.f, -moveSpd, 0.f });
-        camera->pan({ 0.f, -moveSpd, 0.f });
-    }
-
-    if (key == GLFW_KEY_UP && action != GLFW_RELEASE)
-        camera->pan({ 0.f, rotSpd, 0.f });
-    if (key == GLFW_KEY_DOWN && action != GLFW_RELEASE)
-        camera->pan({ 0.f, -rotSpd, 0.f });
-    if (key == GLFW_KEY_LEFT && action != GLFW_RELEASE)
-        camera->pan({ -rotSpd, 0.f, 0.f });
-    if (key == GLFW_KEY_RIGHT && action != GLFW_RELEASE)
-        camera->pan({ rotSpd, 0.f, 0.f });
-};
-
-void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
-
-        if (ypos > mouseY)
-            camera->pan({ 0.f, -rotSpd, 0.f });
-        if (ypos < mouseY)
-            camera->pan({ 0.f, rotSpd, 0.f });
-        if (xpos > mouseX)
-            camera->pan({ rotSpd, 0.f, 0.f });
-        if (xpos < mouseX)
-            camera->pan({ -rotSpd, 0.f, 0.f });
-     
-    mouseX = xpos;
-    mouseY = ypos;
+void Model::setRotation(glm::vec3 scale) {
+    this->rotation = rotation;
 }
 
-void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv) {
-    unsigned int varLoc = glGetUniformLocation(shaderProg, variable);
-    glUniformMatrix4fv(varLoc, 1, GL_FALSE, glm::value_ptr(matrix4fv));
-};
+void Model::setScale(glm::vec3 scale) {
+    this->scale = scale;
+}
