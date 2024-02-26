@@ -48,12 +48,14 @@ void Model::render(GLuint shaderProgram) {
 
     glm::mat4 transformMat(1.f);
 
+    transformMat = glm::translate(transformMat, this->position);
+
     transformMat = glm::rotate(transformMat, glm::radians(this->rotation.x), glm::vec3(1.f,0.f,0.f));
     transformMat = glm::rotate(transformMat, glm::radians(this->rotation.y), glm::vec3(0.f,1.f,0.f));
     transformMat = glm::rotate(transformMat, glm::radians(this->rotation.z), glm::vec3(0.f,0.f,1.f));
 
     transformMat = glm::scale(transformMat, this->scale);
-    transformMat = glm::translate(transformMat, this->position);
+    
 
     unsigned int varLoc = glGetUniformLocation(shaderProgram, "transform");
     glUniformMatrix4fv(varLoc, 1, GL_FALSE, glm::value_ptr(transformMat));
