@@ -18,24 +18,24 @@
 #include "Camera.hpp"
 
 float
-    window_height = 640,
-    window_width = 640;
+window_height = 640,
+window_width = 640;
 
 float
-    moveSpd = 0.2f,
-    rotSpd = 0.2f;
+moveSpd = 0.2f,
+rotSpd = 0.02f;
 
 float
-    cooldown = 0.f,
-    timelimit = 3000.f;
+cooldown = 0.f,
+timelimit = 3000.f;
 
 float
 mouseX = 0.f,
 mouseY = 0.f;
 
-auto 
-    start = std::chrono::steady_clock::now(),
-    timeElapsed = std::chrono::steady_clock::now();
+auto
+start = std::chrono::steady_clock::now(),
+timeElapsed = std::chrono::steady_clock::now();
 
 Camera* camera = new Camera(window_height / window_width);
 std::vector<Model*> models;
@@ -72,11 +72,11 @@ int main(void)
         glfwSwapBuffers(window);
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-       
+
 
         if (cooldown > 0.f) {
             timeElapsed = std::chrono::steady_clock::now();
-            cooldown = timelimit - (float) std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed - start).count();
+            cooldown = timelimit - (float)std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed - start).count();
             std::cout << cooldown << std::endl;
         }
     }
@@ -89,7 +89,7 @@ GLFWwindow* initGLFW() {
     if (!glfwInit())
         return NULL;
 
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Josiah Aviso", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Josiah Aviso & Dun Baniqued", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return NULL;
@@ -98,7 +98,7 @@ GLFWwindow* initGLFW() {
     glfwMakeContextCurrent(window);
     gladLoadGL();
     glfwSetKeyCallback(window, keyCallback);
-    
+
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
@@ -108,27 +108,27 @@ GLFWwindow* initGLFW() {
 };
 
 GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc) {
-    
+
     /* Read the Shaders from their source files */
-    std::fstream        
-                        vertFile(vertShaderSrc),
-                        fragFile(fragShaderSrc);
-    std::stringstream   
-                        vertBuff,
-                        fragBuff;
-                        
-                        vertBuff << vertFile.rdbuf();
-                        fragBuff << fragFile.rdbuf();
-    std::string         
-                        vertStr = vertBuff.str(),
-                        fragStr = fragBuff.str();
-    const char          
-                        *v = vertStr.c_str(),
-                        *f = fragStr.c_str();
+    std::fstream
+        vertFile(vertShaderSrc),
+        fragFile(fragShaderSrc);
+    std::stringstream
+        vertBuff,
+        fragBuff;
+
+    vertBuff << vertFile.rdbuf();
+    fragBuff << fragFile.rdbuf();
+    std::string
+        vertStr = vertBuff.str(),
+        fragStr = fragBuff.str();
+    const char
+        * v = vertStr.c_str(),
+        * f = fragStr.c_str();
     GLuint
-                        vertexShader = glCreateShader(GL_VERTEX_SHADER),
-                        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER),
-                        shaderProg = glCreateProgram();
+        vertexShader = glCreateShader(GL_VERTEX_SHADER),
+        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER),
+        shaderProg = glCreateProgram();
 
     /* Compile Shaders */
     glShaderSource(vertexShader, 1, &v, NULL);
@@ -138,7 +138,7 @@ GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc) {
 
     /* Link Vertex and Fragment Shaders for use */
     glAttachShader(shaderProg, vertexShader);
-    glAttachShader(shaderProg, fragmentShader); 
+    glAttachShader(shaderProg, fragmentShader);
     glLinkProgram(shaderProg);
 
     return shaderProg;
@@ -192,7 +192,7 @@ void keyCallback(
     }
 
     if (key == GLFW_KEY_UP && action != GLFW_RELEASE)
-        camera->pan({ 0.f, rotSpd, 0.f});
+        camera->pan({ 0.f, rotSpd, 0.f });
     if (key == GLFW_KEY_DOWN && action != GLFW_RELEASE)
         camera->pan({ 0.f, -rotSpd, 0.f });
     if (key == GLFW_KEY_LEFT && action != GLFW_RELEASE)
@@ -202,15 +202,16 @@ void keyCallback(
 };
 
 void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
-    if (ypos > mouseY)
-        camera->pan({ 0.f, rotSpd, 0.f });
-    if (ypos < mouseY)
-        camera->pan({ 0.f, -rotSpd, 0.f });
-    if (xpos > mouseX)
-        camera->pan({ rotSpd, 0.f, 0.f });
-    if (xpos < mouseX)
-        camera->pan({ -rotSpd, 0.f, 0.f });
 
+        if (ypos > mouseY)
+            camera->pan({ 0.f, -rotSpd, 0.f });
+        if (ypos < mouseY)
+            camera->pan({ 0.f, rotSpd, 0.f });
+        if (xpos > mouseX)
+            camera->pan({ rotSpd, 0.f, 0.f });
+        if (xpos < mouseX)
+            camera->pan({ -rotSpd, 0.f, 0.f });
+     
     mouseX = xpos;
     mouseY = ypos;
 }
