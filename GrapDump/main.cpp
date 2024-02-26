@@ -18,24 +18,24 @@
 #include "Camera.hpp"
 
 float
-window_height = 640,
-window_width = 640;
+    window_height = 640,
+    window_width = 640;
 
 float
-moveSpd = 0.2f,
-rotSpd = 0.02f;
+    moveSpd = 0.2f,
+    rotSpd = 0.02f;
 
 float
-cooldown = 0.f,
-timelimit = 3000.f;
+    cooldown = 0.f,
+    timelimit = 3000.f;
 
 float
-mouseX = 0.f,
-mouseY = 0.f;
+    mouseX = 0.f,
+    mouseY = 0.f;
 
 auto
-start = std::chrono::steady_clock::now(),
-timeElapsed = std::chrono::steady_clock::now();
+    start = std::chrono::steady_clock::now(),
+    timeElapsed = std::chrono::steady_clock::now();
 
 Camera* camera = new Camera(window_height / window_width);
 std::vector<Model*> models;
@@ -68,6 +68,7 @@ int main(void)
         setShaderMat4fv(shaderProg, "view", camera->getView());
         setShaderMat4fv(shaderProg, "projection", camera->getProjection());
 
+        //Render all objects
         for (int i = 0; i < models.size(); i++)
             models[i]->render(shaderProg);
 
@@ -75,7 +76,7 @@ int main(void)
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+        //Adjust cooldown time by getting timeElapsed from start
         if (cooldown > 0.f) {
             timeElapsed = std::chrono::steady_clock::now();
             cooldown = timelimit - (float)std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed - start).count();
@@ -90,7 +91,7 @@ GLFWwindow* initGLFW() {
     if (!glfwInit())
         return NULL;
 
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Josiah Aviso & Dun Baniqued", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Josiah Aviso & Dun Gerald Baniqued", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return NULL;
@@ -103,6 +104,7 @@ GLFWwindow* initGLFW() {
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
+    //Call function cursorCallback when cursor is moved inside window
     glfwSetCursorPosCallback(window, cursorCallback);
 
     return window;
@@ -157,17 +159,23 @@ void keyCallback(
     if (action == GLFW_RELEASE)
         return;
 
+    //Function to create a new object if space is pressed and if it's not cooling down;
     if (key == GLFW_KEY_SPACE && cooldown <= 0.f) {
+
+        //Create new object then set scale and position
         Model* temp = new Model("3D/Dragon.obj");
         temp->setPosition(camera->center);
         temp->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
         models.push_back(temp);
 
+        //Start cooldown timer
         cooldown = timelimit;
         start = std::chrono::steady_clock::now();
     }
 
+
+    //Move camera based on keys pressed
     if (key == GLFW_KEY_W && action != GLFW_RELEASE) {
         camera->move({ 0.f, 0.f, -moveSpd });
         camera->pan({ 0.f, 0.f, -moveSpd });
@@ -193,6 +201,7 @@ void keyCallback(
         camera->pan({ 0.f, -moveSpd, 0.f });
     }
 
+    //Rotate camera based on key pressed
     if (key == GLFW_KEY_UP && action != GLFW_RELEASE)
         camera->pan({ 0.f, rotSpd, 0.f });
     if (key == GLFW_KEY_DOWN && action != GLFW_RELEASE)
@@ -203,6 +212,9 @@ void keyCallback(
         camera->pan({ rotSpd, 0.f, 0.f });
 };
 
+
+//Adjusts camera based on previous location of the cursor
+//Given that the cursor is inside the window
 void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
 
     if (ypos > mouseY)
@@ -218,6 +230,8 @@ void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
     mouseY = ypos;
 }
 
+
+//Set matrix inside the shader
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv) {
     unsigned int varLoc = glGetUniformLocation(shaderProg, variable);
     glUniformMatrix4fv(varLoc, 1, GL_FALSE, glm::value_ptr(matrix4fv));
