@@ -6,10 +6,14 @@
 layout(location = 2) in vec2 aTex;
 out vec2 texCoord; // output to the frag shader
 
+out vec3 normCoord;
+out vec3 fragPos;
+
 // Start Vertex Transform Stuff
 // Gets the data at Attrib in Index 0
 // Converts it and stores it into a vec3 called aPos
 layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 vertexNormal;
 
 // Declare a variable to hold the data that we plan to pass to the vertecies
 uniform mat4 transform ;
@@ -26,4 +30,10 @@ void main () {
 
 	// sets aTex texture to texCoord which is passed to frag shader
 	texCoord = aTex;
+
+	normCoord = mat3(
+		transpose(inverse(transform)) // Normal Matrix
+	) * vertexNormal ; // Normal Info
+
+	fragPos = vec3(transform * vec4(aPos, 1.0));
 }
