@@ -160,7 +160,7 @@ void keyCallback(
     if (key == GLFW_KEY_SPACE && cooldown <= 0.f) {
         Model* temp = new Model("3D/Dragon.obj");
         temp->setPosition(camera->center);
-        
+        temp->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
         models.push_back(temp);
 
