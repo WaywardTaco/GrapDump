@@ -54,6 +54,8 @@ int main(void)
         return -1;
 
     models.push_back(new Model("3D/Dragon.obj"));
+    //This model is from https://free3d.com/3d-model/dragon-46104.html
+    //Sbmitted by timrh in free3D.com
 
     GLuint shaderProg = compShaderProg("Shader/sample.vert", "Shader/sample.frag");
 
