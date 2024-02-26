@@ -23,7 +23,7 @@ float
 
 float
     moveSpd = 0.2f,
-    rotSpd = 0.5f;
+    rotSpd = 0.2f;
 
 float
     cooldown = 0.f,
