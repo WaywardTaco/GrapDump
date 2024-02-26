@@ -160,6 +160,7 @@ void keyCallback(
     if (key == GLFW_KEY_SPACE && cooldown <= 0.f) {
         Model* temp = new Model("3D/Dragon.obj");
         temp->setPosition(camera->center);
+        
 
         models.push_back(temp);
 
