@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <cmath>
+#include <chrono>
 #include <string>
 #include <iostream>
 
@@ -27,6 +28,10 @@ float
 float
     cooldown = 0.f,
     timelimit = 3000.f;
+
+auto 
+    start = std::chrono::steady_clock::now(),
+    timeElapsed = std::chrono::steady_clock::now();
 
 Camera* camera = new Camera(window_height / window_width);
 std::vector<Model*> models;
@@ -48,6 +53,7 @@ int main(void)
     GLuint shaderProg = compShaderProg("Shader/sample.vert", "Shader/sample.frag");
 
 
+
     while (!glfwWindowShouldClose(window))
     {
         setShaderMat4fv(shaderProg, "view", camera->getView());
@@ -59,9 +65,13 @@ int main(void)
         glfwSwapBuffers(window);
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+       
 
-        if(cooldown > 0.f)
-        std::cout << cooldown-- << std::endl;
+        if (cooldown > 0.f) {
+            timeElapsed = std::chrono::steady_clock::now();
+            cooldown = timelimit - (float) std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed - start).count();
+            std::cout << cooldown << std::endl;
+        }
     }
 
     glfwTerminate();
@@ -141,6 +151,7 @@ void keyCallback(
         models.push_back(temp);
 
         cooldown = timelimit;
+        start = std::chrono::steady_clock::now();
     }
 
     if (key == GLFW_KEY_W && action != GLFW_RELEASE) {
