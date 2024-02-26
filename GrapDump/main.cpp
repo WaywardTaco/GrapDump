@@ -29,6 +29,10 @@ float
     cooldown = 0.f,
     timelimit = 3000.f;
 
+float
+mouseX = 0.f,
+mouseY = 0.f;
+
 auto 
     start = std::chrono::steady_clock::now(),
     timeElapsed = std::chrono::steady_clock::now();
@@ -40,6 +44,7 @@ GLFWwindow* initGLFW();
 
 GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void cursorCallback(GLFWwindow* window, double xpos, double ypos);
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
 int main(void)
@@ -91,6 +96,11 @@ GLFWwindow* initGLFW() {
     glfwMakeContextCurrent(window);
     gladLoadGL();
     glfwSetKeyCallback(window, keyCallback);
+    
+    if (glfwRawMouseMotionSupported())
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+    glfwSetCursorPosCallback(window, cursorCallback);
 
     return window;
 };
@@ -188,6 +198,20 @@ void keyCallback(
     if (key == GLFW_KEY_RIGHT && action != GLFW_RELEASE)
         camera->pan({ rotSpd, 0.f, 0.f });
 };
+
+void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
+    if (ypos > mouseY)
+        camera->pan({ 0.f, rotSpd, 0.f });
+    if (ypos < mouseY)
+        camera->pan({ 0.f, -rotSpd, 0.f });
+    if (xpos > mouseX)
+        camera->pan({ rotSpd, 0.f, 0.f });
+    if (xpos < mouseX)
+        camera->pan({ -rotSpd, 0.f, 0.f });
+
+    mouseX = xpos;
+    mouseY = ypos;
+}
 
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv) {
     unsigned int varLoc = glGetUniformLocation(shaderProg, variable);
