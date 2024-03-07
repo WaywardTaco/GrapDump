@@ -2,8 +2,8 @@
 #version 330 core
 
 // Texture Stuff
-uniform sampler2D tex0; // where the texture gets assigned to
-in vec2 texCoord; // Take it in from the vertex shader, same spelling and data type as vShader
+uniform sampler2D tex0; 
+in vec2 texCoord; 
 
 in vec3 normCoord;
 in vec3 fragPos;
@@ -18,15 +18,23 @@ uniform vec3 cameraPos;
 uniform float specStr;
 uniform float specPhong;
 
-out vec4 FragColor; // Returns a Color of indv pixels, required for frag shaders
+uniform float brightness;
+
+out vec4 FragColor; 
 
 void main() {
+
+	float distance = max(length(fragPos - lightPos), 0.0);
+
+	float intensity = brightness / (distance * distance);
+
+	vec3 lightColorMod = lightColor * intensity;
 
 	vec3 pointNorm = normalize(normCoord);
 	vec3 lightDir = normalize(lightPos - fragPos);
 
 	float diff = max(dot(pointNorm, lightDir), 0.0);
-	vec3 diffuse = diff * lightColor;
+	vec3 diffuse = diff * lightColorMod;
 
 	// Basic ambient calculations
 	vec3 ambientCol = ambientColor * ambientStr;
@@ -35,10 +43,7 @@ void main() {
 	vec3 reflectDir = reflect(-lightDir, pointNorm);
 
 	float spec = pow(max(dot(reflectDir, viewDir), 0.1), specPhong);
-	vec3 specColor = spec * specStr * lightColor;
-
-	// Range 0 to 1 :  R     G     B     A
-	// FragColor = vec4 (0.7f, 0.7f, 0.5f, 1.f) ; // Color of the Fragment, simple single color
+	vec3 specColor = spec * specStr * lightColorMod;
 
 	// Adjusts the color of the fragment depending on coordinate
 	FragColor = vec4(diffuse + ambientCol + specColor, 1.0) * texture(tex0, texCoord);

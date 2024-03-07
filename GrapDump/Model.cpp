@@ -102,9 +102,11 @@ Model::Model(std::string modelPath, std::string texturePath) :
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(tex_bytes); // Free the previously loaded textures
 
+
     /* Clear Editing VAO and VBO */
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    stbi_set_flip_vertically_on_load(false);
 };
 
 Model::~Model() {
@@ -131,7 +133,9 @@ void Model::render(GLuint shaderProgram) {
     glUniform1i(tex0Address, 0); // 0 is the index of the texture
 
     /* Render VAO w/ shader */
-    glUseProgram(shaderProgram); // Applies shaders to all follwoing vertecies
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
+    glUseProgram(shaderProgram); // Applies shaders to all following vertecies
     glBindVertexArray(this->VAO);
     glDrawArrays(GL_TRIANGLES, 0, this->fullVertexData.size() / 5);
     glBindVertexArray(0);
