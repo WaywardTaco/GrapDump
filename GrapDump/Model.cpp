@@ -1,6 +1,8 @@
 
 #include "Model.hpp"
 
+#include <iostream>
+
 Model::Model(std::string modelPath, std::string texturePath) :
     position(0.f), modelScale(1.f), rotation(0.f)
 {
@@ -14,9 +16,29 @@ Model::Model(std::string modelPath, std::string texturePath) :
         modelPath.c_str()
     );
 
+    bool locsuccess;
+    tinyobj::attrib_t locattributes;
+    std::vector<tinyobj::shape_t> locshapes;
+    std::vector<tinyobj::material_t> locmaterial;
+    std::string locwarning, locerror;
+
+    std::string locpath = "3D/djSword.obj";
+
+    locsuccess = tinyobj::LoadObj(
+        &locattributes,
+        &locshapes,
+        &locmaterial,
+        &locwarning,
+        &locerror,
+        locpath.c_str()
+    );
+
+
     for (int i = 0; i < this->shapes[0].mesh.indices.size(); i++) {
 
         tinyobj::index_t vData = this->shapes[0].mesh.indices[i];
+
+        tinyobj::index_t texData = locshapes[0].mesh.indices[i];
 
         /* Load X, Y, Z, Nx, Ny, Nz, U, and V data */
         this->fullVertexData.push_back(this->attributes.vertices[(vData.vertex_index * 3)]);
@@ -27,8 +49,8 @@ Model::Model(std::string modelPath, std::string texturePath) :
         this->fullVertexData.push_back(this->attributes.normals[(vData.normal_index * 3) + 1]);
         this->fullVertexData.push_back(this->attributes.normals[(vData.normal_index * 3) + 2]);
 
-        this->fullVertexData.push_back(this->attributes.texcoords[(vData.texcoord_index * 2)]);
-        this->fullVertexData.push_back(this->attributes.texcoords[(vData.texcoord_index * 2) + 1]);
+        this->fullVertexData.push_back(locattributes.texcoords[texData.texcoord_index * 2]);
+        this->fullVertexData.push_back(locattributes.texcoords[texData.texcoord_index * 2] + 1);
     }
 
     /* Generate VAO & VBO and start editing */

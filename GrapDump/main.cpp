@@ -81,16 +81,16 @@ int main(void)
     );
 
     glm::mat4 projectionMatrix = glm::perspective(
-        glm::radians(100.f), // FOV
+        glm::radians(90.f), // FOV
         window_height / window_width, // aspect ratio
         0.1f, //Znear > 0
         100.f //Zfar
     );
 
-    Model model("3D/djSword.obj", "3D/partenza.jpg");
+    Model model("3D/quiz.obj", "3D/partenza.jpg");
 
     /* Light declaration */
-    glm::vec3 lightPos = glm::vec3(-15.f, 3.f, 0.f);
+    glm::vec3 lightDir = glm::vec3(-1.f, -1.f, 0.f);
     glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 
     float ambientStr = 0.1f;
@@ -99,7 +99,7 @@ int main(void)
     float specStr = 0.5f;
     float specPhong = 16;
 
-    float brightness = 150.f;
+    float brightness = 1.f;
 
     /* Skybox stuff */
     /*
@@ -229,6 +229,8 @@ int main(void)
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
+    float rotation = 0.f;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -262,8 +264,8 @@ int main(void)
         setShaderMat4fv(shaderProg, "projection", projectionMatrix);
 
         /* Lighting */
-        GLuint lightAddress = glGetUniformLocation(shaderProg, "lightPos");
-        glUniform3fv(lightAddress, 1, glm::value_ptr(lightPos));
+        GLuint lightAddress = glGetUniformLocation(shaderProg, "lightDir");
+        glUniform3fv(lightAddress, 1, glm::value_ptr(lightDir));
                 
         GLuint lightColorAddress = glGetUniformLocation(shaderProg, "lightColor");
         glUniform3fv(lightColorAddress, 1, glm::value_ptr(lightColor));
@@ -288,9 +290,11 @@ int main(void)
 
 
         
-        model.setScale(0.01f);
-        model.setRotation({0.f, -60.f, 0.f});
+        model.setScale(0.016f);
+        model.setRotation({0.f, rotation, 0.f});
         model.render(shaderProg);  
+
+        rotation += 0.01f;
 
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
@@ -351,6 +355,7 @@ void keyCallback(
     int mods                // Which modifier keys are held (like Shift, Ctrl, Alt, etc.)
 )
 {
+    /*
     if (action == GLFW_RELEASE)
         return;
 
@@ -381,6 +386,7 @@ void keyCallback(
         z_zoom += 0.02;
     if (key == GLFW_KEY_X && action != GLFW_RELEASE)
         z_zoom -= 0.02;
+    */
 
 };
 
