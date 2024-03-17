@@ -1,8 +1,10 @@
 
 #include "Model.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+
 Model::Model(std::string modelPath, std::string texturePath) :
-    position(0.f), modelScale(1.f), rotation(0.f)
+    position(0.f), modelScale(1.f), rotation(1.f)
 {
 
     this->success = tinyobj::LoadObj(
@@ -115,27 +117,24 @@ Model::~Model() {
 }
 
 void Model::render(GLuint shaderProgram) {
+    glUseProgram(shaderProgram); 
+    
     glm::mat4 transform(1.f);
-
     transform = glm::translate(transform, this->position);
     transform = glm::scale(transform, this->modelScale);
+    transform = transform * this->rotation;
 
-    transform = glm::rotate(transform, glm::radians(this->rotation.x), { 1.f, 0.f, 0.f });
-    transform = glm::rotate(transform, glm::radians(this->rotation.y), { 0.f, 1.f, 0.f });
-    transform = glm::rotate(transform, glm::radians(this->rotation.z), { 0.f, 0.f, 1.f });
-
-    unsigned int varLoc = glGetUniformLocation(shaderProgram, "transform");
-    glUniformMatrix4fv(varLoc, 1, GL_FALSE, glm::value_ptr(transform));
+    unsigned int transformAdrs = glGetUniformLocation(shaderProgram, "transform");
+    glUniformMatrix4fv(transformAdrs, 1, GL_FALSE, glm::value_ptr(transform));
 
     /* Texture stuff */
-    GLuint tex0Address = glGetUniformLocation(shaderProgram, "tex0");
+    GLuint tex0Adrs = glGetUniformLocation(shaderProgram, "tex0");
     glBindTexture(GL_TEXTURE_2D, this->texture);
-    glUniform1i(tex0Address, 0); // 0 is the index of the texture
+    glUniform1i(tex0Adrs, 0); // 0 is the index of the texture
 
     /* Render VAO w/ shader */
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
-    glUseProgram(shaderProgram); // Applies shaders to all following vertecies
     glBindVertexArray(this->VAO);
     glDrawArrays(GL_TRIANGLES, 0, this->fullVertexData.size() / 5);
     glBindVertexArray(0);
@@ -147,10 +146,8 @@ void Model::move(glm::vec3 position) {
     this->position.z += position.z;
 };
 
-void Model::rotate(glm::vec3 rotation) {
-    this->rotation.x += rotation.x;
-    this->rotation.y += rotation.y;
-    this->rotation.z += rotation.z;
+void Model::rotate(float degrees, glm::vec3 axis) {
+    this->rotation = glm::rotate(this->rotation, glm::radians(degrees), glm::normalize(axis));
 };
 
 void Model::scale(float scale) {
@@ -169,8 +166,8 @@ void Model::setPosition(glm::vec3 position) {
     this->position = position;
 };
 
-void Model::setRotation(glm::vec3 rotation) {
-    this->rotation = rotation;
+void Model::setRotation(float degrees, glm::vec3 axis) {
+    this->rotation = glm::rotate(glm::mat4(1.f), glm::radians(degrees), glm::normalize(axis));
 };
 
 void Model::setScale(float scale) {

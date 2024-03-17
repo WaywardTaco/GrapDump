@@ -8,12 +8,11 @@
 #include <glm/gtc/type_ptr.hpp>
 
 class Camera {
-private:
-	double centerDist;
-
-	glm::vec3 position;
-	glm::vec3 center;
-	glm::vec3 worldUp;
+protected:
+	glm::vec3 
+		position,
+		center,
+		worldUp;
 
 	glm::mat4 projection;
 
@@ -23,21 +22,17 @@ public:
 public:
 	void apply(GLuint shaderProgram);
 
-	void adjustCenterDist(double adjust);
-	void absMove(glm::vec3 move);
-	void relMove(glm::vec3 move);
-	void absRotate(glm::vec3 rotate);
-	void relRotate(glm::vec3 rotate);
-	void absMoveCenter(glm::vec3 move);
-	void relMoveCenter(glm::vec3 move);
+	void moveBy(glm::vec3 move);
+	void moveTo(glm::vec3 move);
+	void rotateAround(float degrees, glm::vec3 axis);
+	void turn(float degrees, glm::vec3 axis);
 
-	void setCenterDist(double centerDist);
 	void setPosition(glm::vec3 position);
-	void setRotation(glm::vec3 rotation);
 	void setCenter(glm::vec3 center);
-	void setWorldUp(glm::vec3 worldUp);
 	void setProjection(glm::mat4 projection);
 
-	glm::vec3 getRotation();
+	glm::mat4 getViewMat();
+	glm::mat4 getProjection();
+	glm::vec3 getPosition();
 
 };

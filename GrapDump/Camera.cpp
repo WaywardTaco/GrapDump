@@ -1,9 +1,6 @@
 
 #include "Camera.hpp"
 
-
-glm::vec3 rotation;
-
 Camera::Camera(glm::mat4 projection)
  : position(0.f, 0.f, -1.f), worldUp(0.f, 1.f, 0.f) {
     this->setCenter({0.f, 0.f, 0.f});
@@ -11,81 +8,98 @@ Camera::Camera(glm::mat4 projection)
 };
 
 void Camera::apply(GLuint shaderProgram) {
-    glm::mat4 cameraMat = glm::lookAt(this->position, this->center, this->worldUp);
+    glUseProgram(shaderProgram);
+    glm::mat4 viewMat = glm::lookAt(this->position, this->center, this->worldUp);
 
-    unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(cameraMat));
+    unsigned int viewAdrs = glGetUniformLocation(shaderProgram, "view");
+    glUniformMatrix4fv(viewAdrs, 1, GL_FALSE, glm::value_ptr(viewMat));
 
-    unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(this->projection));
+    unsigned int projectionAdrs = glGetUniformLocation(shaderProgram, "projection");
+    glUniformMatrix4fv(projectionAdrs, 1, GL_FALSE, glm::value_ptr(this->projection));
+
+    GLuint positionAdrs = glGetUniformLocation(shaderProgram, "cameraPos");
+    glUniform3fv(positionAdrs, 1, glm::value_ptr(this->position));
 };
 
-void Camera::adjustCenterDist(double adjust) {
-    this->setCenterDist(this->centerDist + adjust);
-};
+void Camera::moveBy(glm::vec3 move) {
+    this->position += move;
+    this->center += move;
+}
 
-void Camera::absMove(glm::vec3 move) {
-    this->setPosition(this->position + move);
-};
+void Camera::moveTo(glm::vec3 move) {
+    glm::vec3 displacement = move - this->position;
 
-void Camera::relMove(glm::vec3 move) {
+    this->position += displacement;
+    this->center += displacement;
+}
 
-};
+void Camera::rotateAround(float degrees, glm::vec3 axis) {
 
-void Camera::absRotate(glm::vec3 rotate) {
-    glm::mat4 rotationMat(1.f);
-    rotationMat = glm::rotate(rotationMat, glm::radians(rotate.x), { 1.f, 0.f, 0.f });
-    rotationMat = glm::rotate(rotationMat, glm::radians(rotate.y), { 0.f, 1.f, 0.f });
-    rotationMat = glm::rotate(rotationMat, glm::radians(rotate.z), { 0.f, 0.f, 1.f });
+    glm::vec3 forwardVec = glm::normalize(glm::vec3(this->position - this->center));
+    glm::vec3 rightVec = glm::normalize(glm::cross(forwardVec, this->worldUp));
 
-    this->setRotation(rotationMat * glm::vec4(this->getRotation(), 1.f));
-};
+    glm::vec3 upVec = glm::normalize(glm::cross(rightVec, forwardVec));
 
-void Camera::relRotate(glm::vec3 rotate) {
-    glm::mat4 rotationMat(1.f);
-    rotationMat = glm::rotate(rotationMat, glm::radians(rotate.x), { 1.f, 0.f, 0.f });
-    rotationMat = glm::rotate(rotationMat, glm::radians(rotate.y), { 0.f, 1.f, 0.f });
-    rotationMat = glm::rotate(rotationMat, glm::radians(rotate.z), { 0.f, 0.f, 1.f });
+    glm::mat4 cameraTransform = glm::mat4(1.f);
 
-    this->setRotation(rotationMat * glm::vec4(this->getRotation(), 1.f));
-};
+    // [Col][Row]
+    cameraTransform[0][0] = rightVec.x;
+    cameraTransform[0][1] = rightVec.y;
+    cameraTransform[0][2] = rightVec.z;
 
-void Camera::absMoveCenter(glm::vec3 move) {
-    this->setCenter(this->center + move);
-};
+    cameraTransform[1][0] = upVec.x;
+    cameraTransform[1][1] = upVec.y;
+    cameraTransform[1][2] = upVec.z;
 
-void Camera::relMoveCenter(glm::vec3 move) {
+    cameraTransform[2][0] = forwardVec.x;
+    cameraTransform[2][1] = forwardVec.y;
+    cameraTransform[2][2] = forwardVec.z;
 
-};
+    glm::vec3 transformedAxis = glm::normalize(glm::vec3(cameraTransform * glm::vec4(glm::normalize(axis), 1.f)));
 
-void Camera::setCenterDist(double centerDist) {
+
+    glm::mat4 positionTransform = glm::mat4(1.f);
+    positionTransform = glm::rotate(positionTransform, glm::radians(degrees), transformedAxis);
+
+    this->position = glm::vec3(positionTransform * glm::vec4(this->position, 1.f));
+
+    this->worldUp = glm::vec3(positionTransform * glm::vec4(this->worldUp, 1.f));
+
+    // Get the basis vectors centered on the camera center
+    // Turn into a basis transform matrix
+    // Find the axis of rotation in that new basis
+    // Rotate the basis across that axis
+    // Apply transform to the relative position of the camera
+
+
+    // Transform the camera position with respect to the axis of transform of the center (ie. figure out the rotation about the axis in the new vector space)
+    // Then apply the same transform as usual to the postion with respect to that axis to the camera
+}
+
+void Camera::turn(float degrees, glm::vec3 axis) {
     
-};
+}
 
 void Camera::setPosition(glm::vec3 position) {
     this->position = position;
-
-    this->centerDist = glm::length(this->position - this->center);
-};
-
-void Camera::setRotation(glm::vec3 rotation) {
-
 };
 
 void Camera::setCenter(glm::vec3 center) {
     this->center = center;
-
-    this->centerDist = glm::length(this->position - this->center);
-};
-
-void Camera::setWorldUp(glm::vec3 worldUp) {
-    this->worldUp = worldUp;
 };
 
 void Camera::setProjection(glm::mat4 projection) {
     this->projection = projection;
 };
 
-glm::vec3 Camera::getRotation() {
-    return glm::normalize(glm::vec3(this->center - this->position));
-};
+glm::mat4 Camera::getViewMat() {
+    return glm::lookAt(this->position, this->center, this->worldUp);
+}
+
+glm::mat4 Camera::getProjection() {
+    return this->projection;
+}
+
+glm::vec3 Camera::getPosition() {
+    return this->position;
+}

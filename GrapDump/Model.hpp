@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -7,8 +9,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#ifndef INCLUDE_TINYOBJ
+#define INCLUDE_TINYOBJ
 #include "tiny_obj_loader.h"
+#endif
+
+#ifndef STBI_INCLUDE_STB_IMAGE_H
 #include "stb_image.h"
+#endif
 
 class Model {
 private:
@@ -21,8 +29,8 @@ private:
     std::vector<GLfloat> fullVertexData;
 
     glm::vec3 position;
-    glm::vec3 rotation;
     glm::vec3 modelScale;
+    glm::mat4 rotation;
 
 public:
     Model(std::string modelPath, std::string texturePath);
@@ -32,12 +40,12 @@ public:
     void render(GLuint shaderProgram);
 
     void move(glm::vec3 position);
-    void rotate(glm::vec3 rotation);
+    void rotate(float degrees, glm::vec3 axis);
     void scale(float scale);
     void scale(glm::vec3 scale);
 
     void setPosition(glm::vec3 position);
-    void setRotation(glm::vec3 rotation);
+    void setRotation(float degrees, glm::vec3 axis);
     void setScale(float scale);
     void setScale(glm::vec3 scale);
 };

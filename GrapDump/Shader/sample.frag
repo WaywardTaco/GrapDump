@@ -34,6 +34,14 @@ void main() {
 	vec3 lightDir = normalize(lightPos - fragPos);
 
 	float diff = max(dot(pointNorm, lightDir), 0.0);
+
+	//if(diff < 0.05)
+		//diff = 0.05;
+	//else if(diff < 0.5)
+		//diff = 0.5;
+	//else if(diff >= 0.5)
+		//diff = 1.0;
+
 	vec3 diffuse = diff * lightColorMod;
 
 	// Basic ambient calculations
