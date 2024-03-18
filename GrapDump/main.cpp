@@ -55,7 +55,7 @@ bool controllingLight = false;
 
 GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void cursorCallback(GLFWwindow* window, float xPos, float yPos);
+void cursorCallback(GLFWwindow* window, double xPos, double yPos);
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
 /* BUGS / TODOS
@@ -106,6 +106,11 @@ int main(void)
     /* Initializations */
     gladLoadGL();
     glfwSetKeyCallback(window, keyCallback);
+
+    if (glfwRawMouseMotionSupported())
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+    glfwSetCursorPosCallback(window, cursorCallback);
 
 
     /* Light declaration */
@@ -278,7 +283,7 @@ void keyCallback(
     /* POV Drag movement */
 }
 
-void cursorCallback(GLFWwindow* window, float xpos, float ypos) {
+void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
 
     if (ypos > mouseY)
         std::cout << "Spin along cam X" << std::endl;
