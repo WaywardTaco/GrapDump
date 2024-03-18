@@ -39,7 +39,7 @@
     <ClCompile Include="PerspectiveCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OrthoCam.cpp">
+    <ClCompile Include="OrthoCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DirectionLight.cpp">
@@ -68,10 +68,10 @@
     <ClInclude Include="PointLight.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PerspectiveCam.hpp">
+    <ClInclude Include="PerspectiveCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OrthoCam.hpp">
+    <ClInclude Include="OrthoCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DirectionLight.hpp">

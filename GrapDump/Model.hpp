@@ -32,8 +32,12 @@ private:
     glm::vec3 modelScale;
     glm::mat4 rotation;
 
+    glm::vec3 modelBaseColor;
+    bool hasTexture;
+
 public:
     Model(std::string modelPath, std::string texturePath);
+    Model(std::string modelPath, glm::vec3 plainColor);
     ~Model();
 
 public:
@@ -48,4 +52,5 @@ public:
     void setRotation(float degrees, glm::vec3 axis);
     void setScale(float scale);
     void setScale(glm::vec3 scale);
+    void setBaseColor(glm::vec3 color);
 };

@@ -145,7 +145,7 @@
     <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="OrthoCam.cpp" />
+    <ClCompile Include="OrthoCamera.cpp" />
     <ClCompile Include="PerspectiveCamera.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Skybox.cpp" />
@@ -155,8 +155,8 @@
     <ClInclude Include="DirectionLight.hpp" />
     <ClInclude Include="LightSource.hpp" />
     <ClInclude Include="Model.hpp" />
-    <ClInclude Include="OrthoCam.hpp" />
-    <ClInclude Include="PerspectiveCam.hpp" />
+    <ClInclude Include="OrthoCamera.hpp" />
+    <ClInclude Include="PerspectiveCamera.hpp" />
     <ClInclude Include="PointLight.hpp" />
     <ClInclude Include="Skybox.hpp" />
     <ClInclude Include="stb_image.h" />

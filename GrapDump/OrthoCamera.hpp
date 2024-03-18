@@ -3,13 +3,13 @@
 
 #include "Camera.hpp"
 
-class OrthoCam : public Camera {
+class OrthoCamera : public Camera {
 private:
 	float
 		left, right, bottom, top, zNear, zFar;
 
 public:
-	OrthoCam();
+	OrthoCamera();
 
 	void setBounds(
 		float left,

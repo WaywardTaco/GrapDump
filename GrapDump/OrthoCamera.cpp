@@ -1,11 +1,11 @@
 
-#include "OrthoCam.hpp"
+#include "OrthoCamera.hpp"
 
-OrthoCam::OrthoCam() :
-	Camera(glm::ortho(-2.f, 2.f, -2.f, 2.f, -1.f, 1.f)),
-	left(-2.f), right(2.f), bottom(-2.f), top(2.f), zNear(-1.f), zFar(1.f) {}
+OrthoCamera::OrthoCamera() :
+	Camera(glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f)),
+	left(-1.f), right(1.f), bottom(-1.f), top(1.f), zNear(-1.f), zFar(1.f) {}
 
-void OrthoCam::setBounds(
+void OrthoCamera::setBounds(
 	float left,
 	float right,
 	float bottom,
@@ -22,32 +22,32 @@ void OrthoCam::setBounds(
 	this->projection = glm::ortho(this->left, this->right, this->bottom, this->top, this->zNear, this->zFar);
 }
 
-void OrthoCam::setLeft(float left){
+void OrthoCamera::setLeft(float left){
 	this->left = left;
 	this->projection = glm::ortho(this->left, this->right, this->bottom, this->top, this->zNear, this->zFar);
 }
 
-void OrthoCam::setRight(float right) {
+void OrthoCamera::setRight(float right) {
 	this->right = right;
 	this->projection = glm::ortho(this->left, this->right, this->bottom, this->top, this->zNear, this->zFar);
 }
 
-void OrthoCam::setBottom(float bottom) {
+void OrthoCamera::setBottom(float bottom) {
 	this->bottom = bottom;
 	this->projection = glm::ortho(this->left, this->right, this->bottom, this->top, this->zNear, this->zFar);
 }
 
-void OrthoCam::setTop(float top) {
+void OrthoCamera::setTop(float top) {
 	this->top = top;
 	this->projection = glm::ortho(this->left, this->right, this->bottom, this->top, this->zNear, this->zFar);
 }
 
-void OrthoCam::setZnear(float zNear) {
+void OrthoCamera::setZnear(float zNear) {
 	this->zNear = zNear;
 	this->projection = glm::ortho(this->left, this->right, this->bottom, this->top, this->zNear, this->zFar);
 }
 
-void OrthoCam::setZfar(float zFar) {
+void OrthoCamera::setZfar(float zFar) {
 	this->zFar = zFar;
 	this->projection = glm::ortho(this->left, this->right, this->bottom, this->top, this->zNear, this->zFar);
 }

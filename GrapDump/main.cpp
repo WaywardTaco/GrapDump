@@ -27,8 +27,8 @@
 
 #include "Model.hpp"
 #include "Camera.hpp"
-#include "PerspectiveCam.hpp"
-#include "OrthoCam.hpp"
+#include "PerspectiveCamera.hpp"
+#include "OrthoCamera.hpp"
 #include "Skybox.hpp"
 #include "LightSource.hpp"
 #include "PointLight.hpp"
@@ -47,9 +47,42 @@ float
     window_height = 1000,
     window_width = 1000;
 
+bool controllingLight = false;
+
+/**********************************************************************/
+
 GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
+
+/* BUGS / TODOS
+    Main object movement
+        - Own OBJ w/ Textures
+        AD - Y Axis
+        WS - X Axis
+        QE - Z Axis
+        Space - swap to light control (change light color)
+    Light Model
+        - Unlit but colored to light color for point light
+        - Direction Light at {4, -5, 0} pointing to center
+        AD - around the y
+        WS - around the x
+        QE - around the z
+        Space - swap to main object control (change color)
+        Up/Down - point light brightness
+        Left/Right - direction light brightness
+        - Direction light not tested yet
+        - Light shading doesnt handle multiple lightsources yet
+    POV Camera
+        - mouse rotates around the main model
+        - 2 for ortho
+    Ortho Camera
+        - sees point light and model
+        - 1 for perspective
+        - OrthoCamera looks weird when plugged in
+
+*/
+
 
 int main(void)
 {
@@ -71,19 +104,17 @@ int main(void)
     gladLoadGL();
     glfwSetKeyCallback(window, keyCallback);
 
-    // Front-back texture fixing
-    glEnable(GL_DEPTH_TEST); 
-
-    GLuint shaderProg = compShaderProg("Shader/sample.vert", "Shader/sample.frag");
-    GLuint skyboxShader = compShaderProg("Shader/Skybox.vert", "Shader/Skybox.frag");
 
     /* Light declaration */
-    PointLight tempLight({-15.f, 3.f, -5.f});
+    PointLight pointLight({ -15.f, 3.f, -5.f });
+    DirectionLight directionLight({-4.f, 5.f, 0.f});
 
-    PerspectiveCam* tempCam = new PerspectiveCam();
+    Camera* currentCamera;
+    PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
+    OrthoCamera* orthoCamera = new OrthoCamera();
 
-    Model model("3D/djSword.obj", "3D/partenza.jpg");
-    model.setScale(0.01f);
+    Model mainModel("3D/djSword.obj", "3D/partenza.jpg");
+    Model lightModel("3D/djSword.obj", glm::vec3{ 0.5f, 0.5f, 0.f });
 
     Skybox* sky = new Skybox(
         "Skybox/rainbow_rt.png",
@@ -93,15 +124,38 @@ int main(void)
         "Skybox/rainbow_ft.png",
         "Skybox/rainbow_bk.png");
 
+
+
+
+
+
+
+
+
+
+
+    // Front-back texture fixing
+    glEnable(GL_DEPTH_TEST); 
+
+    GLuint shaderProg = compShaderProg("Shader/sample.vert", "Shader/sample.frag");
+    GLuint skyboxShader = compShaderProg("Shader/Skybox.vert", "Shader/Skybox.frag");
+
+    
+    perspectiveCamera->setPosition({0.f, 0.f, -1.f});
+    mainModel.setScale(0.01f);
+    lightModel.setScale(0.01f);
+    lightModel.setPosition({-0.5f, 0.5f, 0.f});
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Lighting */
-        tempLight.apply(shaderProg);
+        pointLight.apply(shaderProg);
         
-        sky->render(skyboxShader, (Camera*)tempCam);
-        tempCam->apply(shaderProg);
-        model.render(shaderProg);  
+        sky->render(skyboxShader, (Camera*)perspectiveCamera);
+        perspectiveCamera->apply(shaderProg);
+        mainModel.render(shaderProg);
+        lightModel.render(shaderProg);
         
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
@@ -164,34 +218,61 @@ void keyCallback(
     if (action == GLFW_RELEASE)
         return;
 
-    if (key == GLFW_KEY_W && action != GLFW_RELEASE)
-        y_mov -= 2;
-    if (key == GLFW_KEY_A && action != GLFW_RELEASE)
-        x_mov += 2;
-    if (key == GLFW_KEY_S && action != GLFW_RELEASE)
-        y_mov += 2;
-    if (key == GLFW_KEY_D && action != GLFW_RELEASE)
-        x_mov -= 2;
+    if (key == GLFW_KEY_W)
+        if(controllingLight)
+            std::cout << "Rotate X Up" << std::endl;
+        else
+            std::cout << "X Up" << std::endl;
+    if (key == GLFW_KEY_S)
+        if (controllingLight)
+            std::cout << "Rotate X Down" << std::endl;
+        else
+            std::cout << "X Down" << std::endl;
+    if (key == GLFW_KEY_A)
+        if (controllingLight)
+            std::cout << "Rotate Y Up" << std::endl;
+        else
+            std::cout << "Y Up" << std::endl;
+    if (key == GLFW_KEY_D)
+        if (controllingLight)
+            std::cout << "Rotate Y Down" << std::endl;
+        else
+            std::cout << "Y Down" << std::endl;
+    if (key == GLFW_KEY_E)
+        if (controllingLight)
+            std::cout << "Rotate Z Up" << std::endl;
+        else
+            std::cout << "Z Up" << std::endl;
+    if (key == GLFW_KEY_Q)
+        if (controllingLight)
+            std::cout << "Rotate Z Down" << std::endl;
+        else
+            std::cout << "Z Down" << std::endl;
+       
+    if (key == GLFW_KEY_SPACE) {
+        if (controllingLight)
+            controllingLight = false;
+        else
+            controllingLight = true;
 
-    if (key == GLFW_KEY_UP && action != GLFW_RELEASE)
-        z_zoom += 0.02;
-    if (key == GLFW_KEY_DOWN && action != GLFW_RELEASE)
-        z_zoom -= 0.02;
-    if (key == GLFW_KEY_LEFT && action != GLFW_RELEASE)
-        x_rot -= 5;
-    if (key == GLFW_KEY_RIGHT && action != GLFW_RELEASE)
-        x_rot += 5;
+        std::cout << "Light shifts color" << std::endl;
+    }
 
-    if (key == GLFW_KEY_Q && action != GLFW_RELEASE)
-        s_scale -= 0.02;
-    if (key == GLFW_KEY_E && action != GLFW_RELEASE)
-        s_scale += 0.02;
+    if (key == GLFW_KEY_UP)
+        std::cout << "Point light brighter" << std::endl;
+    if (key == GLFW_KEY_DOWN)
+        std::cout << "Point light down" << std::endl;
+    if (key == GLFW_KEY_RIGHT)
+        std::cout << "Direction Light Up" << std::endl;
+    if (key == GLFW_KEY_LEFT)
+        std::cout << "Direction Light Down" << std::endl;
 
-    if (key == GLFW_KEY_Z && action != GLFW_RELEASE)
-        z_zoom += 0.02;
-    if (key == GLFW_KEY_X && action != GLFW_RELEASE)
-        z_zoom -= 0.02;
-
+    if (key == GLFW_KEY_1)
+        std::cout << "Current cam set to perspective" << std::endl;
+    if (key == GLFW_KEY_2)
+        std::cout << "Current cam set to ortho" << std::endl;
+    
+    /* POV Drag movement */
 };
 
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv) {

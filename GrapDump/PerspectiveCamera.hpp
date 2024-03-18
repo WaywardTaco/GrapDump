@@ -3,13 +3,13 @@
 
 #include "Camera.hpp"
 
-class PerspectiveCam : public Camera {
+class PerspectiveCamera : public Camera {
 private:
 	float
 		FOV, aspectRatio, zNear, zFar;
 
 public:
-	PerspectiveCam();
+	PerspectiveCamera();
 
 	void setFOV(float FOV);
 	void setAspectRatio(float heightByWidth);

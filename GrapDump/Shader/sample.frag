@@ -20,6 +20,9 @@ uniform float specPhong;
 
 uniform float brightness;
 
+uniform bool modelHasTexture;
+uniform vec3 modelBaseColor;
+
 out vec4 FragColor; 
 
 void main() {
@@ -35,13 +38,6 @@ void main() {
 
 	float diff = max(dot(pointNorm, lightDir), 0.0);
 
-	//if(diff < 0.05)
-		//diff = 0.05;
-	//else if(diff < 0.5)
-		//diff = 0.5;
-	//else if(diff >= 0.5)
-		//diff = 1.0;
-
 	vec3 diffuse = diff * lightColorMod;
 
 	// Basic ambient calculations
@@ -54,6 +50,10 @@ void main() {
 	vec3 specColor = spec * specStr * lightColorMod;
 
 	// Adjusts the color of the fragment depending on coordinate
-	FragColor = vec4(diffuse + ambientCol + specColor, 1.0) * texture(tex0, texCoord);
+	if(modelHasTexture){
+		FragColor = vec4(diffuse + ambientCol + specColor, 1.0) * texture(tex0, texCoord);
+	} else {
+		FragColor = vec4(modelBaseColor, 1.0);
+	}
 
 }

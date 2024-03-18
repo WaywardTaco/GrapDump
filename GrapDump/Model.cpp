@@ -4,7 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 Model::Model(std::string modelPath, std::string texturePath) :
-    position(0.f), modelScale(1.f), rotation(1.f)
+    position(0.f), modelScale(1.f), rotation(1.f), modelBaseColor(1.f), hasTexture(true)
 {
 
     this->success = tinyobj::LoadObj(
@@ -111,6 +111,58 @@ Model::Model(std::string modelPath, std::string texturePath) :
     stbi_set_flip_vertically_on_load(false);
 };
 
+Model::Model(std::string modelPath, glm::vec3 plainColor) :
+    position(0.f), modelScale(1.f), rotation(1.f), modelBaseColor(plainColor), hasTexture(false), texture(0)
+{
+
+    this->success = tinyobj::LoadObj(
+        &this->attributes,
+        &this->shapes,
+        &this->material,
+        &this->warning,
+        &this->error,
+        modelPath.c_str()
+    );
+
+    for (int i = 0; i < this->shapes[0].mesh.indices.size(); i++) {
+
+        tinyobj::index_t vData = this->shapes[0].mesh.indices[i];
+
+        /* Load X, Y, Z, Nx, Ny, Nz, U, and V data */
+        this->fullVertexData.push_back(this->attributes.vertices[(vData.vertex_index * 3)]);
+        this->fullVertexData.push_back(this->attributes.vertices[(vData.vertex_index * 3) + 1]);
+        this->fullVertexData.push_back(this->attributes.vertices[(vData.vertex_index * 3) + 2]);
+
+        this->fullVertexData.push_back(this->attributes.normals[(vData.normal_index * 3)]);
+        this->fullVertexData.push_back(this->attributes.normals[(vData.normal_index * 3) + 1]);
+        this->fullVertexData.push_back(this->attributes.normals[(vData.normal_index * 3) + 2]);
+    }
+
+    /* Generate VAO & VBO and start editing */
+    glGenVertexArrays(1, &this->VAO);
+    glGenBuffers(1, &this->VBO);
+    glBindVertexArray(this->VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+
+    /* Load data into VBO then VAO */
+    /* Type of Buffer Data | Size of array to copy | Array to copy | For render optimization */
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * this->fullVertexData.size(), this->fullVertexData.data(), GL_DYNAMIC_DRAW);
+
+    /* Normals and UV Offset for data loading */
+    GLintptr normalsPtr = 3 * sizeof(float);
+
+    /* Data Layer | Component Count for X, Y, Z | Data Type | If Normalized | Size of a Vertex (w/ UV) | Stride value (offset) */
+    /* 0 is Pos, 2 is UV */
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)normalsPtr);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    /* Clear Editing VAO and VBO */
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+};
+
 Model::~Model() {
     glDeleteVertexArrays(1, &this->VAO);
     glDeleteBuffers(1, &this->VBO);
@@ -126,6 +178,12 @@ void Model::render(GLuint shaderProgram) {
 
     unsigned int transformAdrs = glGetUniformLocation(shaderProgram, "transform");
     glUniformMatrix4fv(transformAdrs, 1, GL_FALSE, glm::value_ptr(transform));
+
+    unsigned int baseColorAdrs = glGetUniformLocation(shaderProgram, "modelBaseColor");
+    glUniform3fv(baseColorAdrs, 1, glm::value_ptr( this->modelBaseColor));
+
+    unsigned int hasTexAdrs = glGetUniformLocation(shaderProgram, "modelHasTexture");
+    glUniform1i(hasTexAdrs, this->hasTexture);
 
     /* Texture stuff */
     GLuint tex0Adrs = glGetUniformLocation(shaderProgram, "tex0");
@@ -177,3 +235,7 @@ void Model::setScale(float scale) {
 void Model::setScale(glm::vec3 scale) {
     this->modelScale = scale;
 };
+
+void Model::setBaseColor(glm::vec3 color) {
+    this->modelBaseColor = color;
+}
