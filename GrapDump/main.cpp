@@ -40,7 +40,9 @@ float
     x_rot = 0.f,
     y_rot = 0.f,
     s_scale = 1.f,
-    z_zoom = 0.f
+    z_zoom = 0.f,
+    mouseX = 0.f,
+    mouseY = 0.f
 ;
 
 float
@@ -53,6 +55,7 @@ bool controllingLight = false;
 
 GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void cursorCallback(GLFWwindow* window, float xPos, float yPos);
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
 /* BUGS / TODOS
@@ -273,12 +276,27 @@ void keyCallback(
         std::cout << "Current cam set to ortho" << std::endl;
     
     /* POV Drag movement */
-};
+}
+
+void cursorCallback(GLFWwindow* window, float xpos, float ypos) {
+
+    if (ypos > mouseY)
+        std::cout << "Spin along cam X" << std::endl;
+    if (ypos < mouseY)
+        std::cout << "Spin along cam -X" << std::endl;
+    if (xpos > mouseX)
+        std::cout << "Spin along cam Y" << std::endl;
+    if (xpos < mouseX)
+        std::cout << "Spin along cam -Y" << std::endl;
+
+    mouseX = xpos;
+    mouseY = ypos;
+}
 
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv) {
     unsigned int varLoc = glGetUniformLocation(shaderProg, variable);
     glUniformMatrix4fv(varLoc, 1, GL_FALSE, glm::value_ptr(matrix4fv));
-};
+}
 
 /* Older Notes */
 /*
