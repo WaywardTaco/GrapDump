@@ -26,6 +26,7 @@ public:
 	void setColor(glm::vec3 color);
 	void setAmbientColor(glm::vec3 color);
 	void setBrightness(float brightness);
+	void adjustBrightness(float brightness);
 	void setSpecStrength(float strength);
 	void setSpecPhong(float phong);
 

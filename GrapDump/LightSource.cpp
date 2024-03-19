@@ -40,6 +40,10 @@ void LightSource::setBrightness(float brightness){
 	this->brightness = brightness;
 }
 
+void LightSource::adjustBrightness(float brightness) {
+    this->brightness += brightness;
+}
+
 void LightSource::setSpecStrength(float strength){
 	this->specularStrength = strength;
 }

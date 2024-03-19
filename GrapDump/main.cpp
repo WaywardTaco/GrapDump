@@ -35,35 +35,59 @@
 #include "DirectionLight.hpp"
 
 float
-    x_mov = 0.f,
-    y_mov = 1.f,
-    x_rot = 0.f,
-    y_rot = 0.f,
-    s_scale = 1.f,
-    z_zoom = 0.f,
+    mouseY = 0.f,
     mouseX = 0.f,
-    mouseY = 0.f
-;
+    modelMoveSpd = 0.05f,
+    lightRotSpd = 10.f,
+    brightnessStep = 10.f,
+    camPanSpeed = 0.5f;
+
+glm::vec3 lightColors[] = {
+    {1.f, 1.f, 1.f},
+    {1.f, 0.f, 0.f},
+    {1.f, 1.f, 0.f},
+    {0.f, 1.f, 0.f},
+    {0.f, 1.f, 1.f},
+    {0.f, 0.f, 1.f},
+    {1.f, 0.f, 1.f}
+};
+int lightColIndex = 0;
 
 float
     window_height = 1000,
     window_width = 1000;
 
-bool controllingLight = false;
+bool 
+    controllingLight = false,
+    wPressed = false,
+    aPressed = false,
+    sPressed = false,
+    dPressed = false,
+    qPressed = false,
+    ePressed = false,
+    upPressed = false,
+    downPressed = false,
+    leftPressed = false,
+    rightPressed = false,
+    onePressed = false,
+    twoPressed = false,
+    spacePressed = false,
+    mouseUp = false,
+    mouseDown = false,
+    mouseLeft = false,
+    mouseRight = false;
 
 /**********************************************************************/
 
 GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void cursorCallback(GLFWwindow* window, double xPos, double yPos);
+void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight);
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
 /* BUGS / TODOS
     Main object movement
         - Own OBJ w/ Textures
-        AD - Y Axis
-        WS - X Axis
-        QE - Z Axis
         Space - swap to light control (change light color)
     Light Model
         - Unlit but colored to light color for point light
@@ -114,15 +138,15 @@ int main(void)
 
 
     /* Light declaration */
-    PointLight pointLight({ -15.f, 3.f, -5.f });
-    DirectionLight directionLight({-4.f, 5.f, 0.f});
+    PointLight* pointLight = new PointLight({ -15.f, 3.f, -5.f });
+    DirectionLight* directionLight = new DirectionLight({-4.f, 5.f, 0.f});
 
     Camera* currentCamera;
     PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
     OrthoCamera* orthoCamera = new OrthoCamera();
 
-    Model mainModel("3D/djSword.obj", "3D/partenza.jpg");
-    Model lightModel("3D/djSword.obj", glm::vec3{ 0.5f, 0.5f, 0.f });
+    Model* mainModel = new Model("3D/djSword.obj", "3D/partenza.jpg");
+    Model* lightModel = new Model("3D/djSword.obj", glm::vec3{ 1.f, 1.f, 1.f });
 
     Skybox* sky = new Skybox(
         "Skybox/rainbow_rt.png",
@@ -150,24 +174,25 @@ int main(void)
 
     
     perspectiveCamera->setPosition({0.f, 0.f, -1.f});
-    mainModel.setScale(0.01f);
-    lightModel.setScale(0.01f);
-    lightModel.setPosition({-0.5f, 0.5f, 0.f});
+    mainModel->setScale(0.01f);
+    lightModel->setScale(0.01f);
+    lightModel->setPosition({-0.5f, 0.5f, 0.f});
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Lighting */
-        pointLight.apply(shaderProg);
+        pointLight->apply(shaderProg);
         
         sky->render(skyboxShader, (Camera*)perspectiveCamera);
         perspectiveCamera->apply(shaderProg);
-        mainModel.render(shaderProg);
-        lightModel.render(shaderProg);
+        mainModel->render(shaderProg);
+        lightModel->render(shaderProg);
         
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
         glfwPollEvents();
+        processInput(perspectiveCamera, mainModel, lightModel, pointLight, directionLight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
@@ -227,75 +252,158 @@ void keyCallback(
         return;
 
     if (key == GLFW_KEY_W)
-        if(controllingLight)
-            std::cout << "Rotate X Up" << std::endl;
-        else
-            std::cout << "X Up" << std::endl;
+        wPressed = true;
     if (key == GLFW_KEY_S)
-        if (controllingLight)
-            std::cout << "Rotate X Down" << std::endl;
-        else
-            std::cout << "X Down" << std::endl;
+        sPressed = true;
     if (key == GLFW_KEY_A)
-        if (controllingLight)
-            std::cout << "Rotate Y Up" << std::endl;
-        else
-            std::cout << "Y Up" << std::endl;
+        aPressed = true;
     if (key == GLFW_KEY_D)
-        if (controllingLight)
-            std::cout << "Rotate Y Down" << std::endl;
-        else
-            std::cout << "Y Down" << std::endl;
+        dPressed = true;
     if (key == GLFW_KEY_E)
-        if (controllingLight)
-            std::cout << "Rotate Z Up" << std::endl;
-        else
-            std::cout << "Z Up" << std::endl;
+        ePressed = true;
     if (key == GLFW_KEY_Q)
-        if (controllingLight)
-            std::cout << "Rotate Z Down" << std::endl;
-        else
-            std::cout << "Z Down" << std::endl;
+        qPressed = true;
        
-    if (key == GLFW_KEY_SPACE) {
-        if (controllingLight)
-            controllingLight = false;
-        else
-            controllingLight = true;
-
-        std::cout << "Light shifts color" << std::endl;
-    }
+    if (key == GLFW_KEY_SPACE) 
+        spacePressed = true;
 
     if (key == GLFW_KEY_UP)
-        std::cout << "Point light brighter" << std::endl;
+        upPressed = true;
     if (key == GLFW_KEY_DOWN)
-        std::cout << "Point light down" << std::endl;
+        downPressed = true;
     if (key == GLFW_KEY_RIGHT)
-        std::cout << "Direction Light Up" << std::endl;
+        rightPressed = true;
     if (key == GLFW_KEY_LEFT)
-        std::cout << "Direction Light Down" << std::endl;
+        leftPressed = true;
 
     if (key == GLFW_KEY_1)
-        std::cout << "Current cam set to perspective" << std::endl;
+        onePressed = true;
     if (key == GLFW_KEY_2)
-        std::cout << "Current cam set to ortho" << std::endl;
-    
-    /* POV Drag movement */
+        twoPressed = true;
 }
 
 void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
 
     if (ypos > mouseY)
-        std::cout << "Spin along cam X" << std::endl;
+        mouseUp = true;
     if (ypos < mouseY)
-        std::cout << "Spin along cam -X" << std::endl;
+        mouseDown = true;
     if (xpos > mouseX)
-        std::cout << "Spin along cam Y" << std::endl;
+        mouseRight = true;
     if (xpos < mouseX)
-        std::cout << "Spin along cam -Y" << std::endl;
+        mouseLeft = true;
 
     mouseX = xpos;
     mouseY = ypos;
+}
+
+
+void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight) {
+    if (wPressed) {
+        if (controllingLight) {
+            pointLight->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 1.f, 0.f, 0.f });
+            light->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 1.f, 0.f, 0.f });
+        }
+        else
+            mainModel->move({ 0.f, modelMoveSpd, 0.f });
+        wPressed = false;
+    }
+    if (sPressed) {
+        if (controllingLight) {
+            pointLight->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 1.f, 0.f, 0.f });
+            light->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 1.f, 0.f, 0.f });
+        }
+        else
+            mainModel->move({ 0.f, -modelMoveSpd, 0.f });
+        sPressed = false;
+    }
+    if (dPressed) {
+        if (controllingLight) {
+            pointLight->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 0.f, 1.f, 0.f });
+            light->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 0.f, 1.f, 0.f });
+        }
+        else
+            mainModel->move({ -modelMoveSpd, 0.f, 0.f });
+        dPressed = false;
+    }
+    if (aPressed) {
+        if (controllingLight) {
+            pointLight->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 0.f, 1.f, 0.f });
+            light->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 0.f, 1.f, 0.f });
+        }
+        else
+            mainModel->move({ modelMoveSpd, 0.f, 0.f });
+        aPressed = false;
+    }
+    if (ePressed) {
+        if (controllingLight) {
+            pointLight->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 0.f, 0.f, 1.f });
+            light->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 0.f, 0.f, 1.f });
+        }
+        else
+            mainModel->move({ 0.f, 0.f, modelMoveSpd});
+        ePressed = false;
+    }
+    if (qPressed) {
+        if (controllingLight) {
+            pointLight->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 0.f, 0.f, 1.f });
+            light->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 0.f, 0.f, 1.f });
+        }
+        else
+            mainModel->move({0.f, 0.f, -modelMoveSpd});
+        qPressed = false;
+    }
+    if (upPressed) {
+        pointLight->adjustBrightness(brightnessStep);
+        upPressed = false;
+    }
+    if (downPressed) {
+        pointLight->adjustBrightness(-brightnessStep);
+        downPressed = false;
+    }
+    if (rightPressed) {
+        dirLight->adjustBrightness(brightnessStep);
+        rightPressed = false;
+    }
+    if (leftPressed) {
+        dirLight->adjustBrightness(-brightnessStep);
+        leftPressed = false;
+    }
+    if (onePressed) {
+        // Cam is set to Perspective
+        onePressed = false;
+    }
+    if (twoPressed) {
+        // Cam is set to ortho
+        twoPressed = false;
+    }
+    if (spacePressed) {
+        if (controllingLight)
+            controllingLight = false;
+        else
+            controllingLight = true;
+
+        lightColIndex = (lightColIndex + 1) % 7;
+        pointLight->setColor(lightColors[lightColIndex]);
+        light->setBaseColor(lightColors[lightColIndex]);
+        spacePressed = false;
+    }
+    if (mouseUp) {
+        cam->rotateAround(camPanSpeed, {1.f, 0.f, 0.f});
+        mouseUp = false;
+    }
+    if (mouseDown) {
+        cam->rotateAround(-camPanSpeed, { 1.f, 0.f, 0.f });
+        mouseDown = false;
+    }
+    if (mouseRight) {
+        cam->rotateAround(camPanSpeed, { 0.f, 1.f, 0.f });
+        mouseRight = false;
+    }
+    if (mouseLeft) {
+        cam->rotateAround(-camPanSpeed, { 0.f, 1.f, 0.f });
+        mouseLeft = false;
+    }
 }
 
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv) {

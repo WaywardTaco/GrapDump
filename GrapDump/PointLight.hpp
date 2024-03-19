@@ -13,6 +13,8 @@ public:
 
 	void apply(GLuint shaderProgram);
 
+	void rotateAround(glm::vec3 center, float degrees, glm::vec3 axis);
+
 	void setPosition(glm::vec3 position);
 	void move(glm::vec3 move);
 };
