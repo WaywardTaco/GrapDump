@@ -205,7 +205,7 @@ void Model::move(glm::vec3 position) {
 };
 
 void Model::rotate(float degrees, glm::vec3 axis) {
-    this->rotation = glm::rotate(this->rotation, glm::radians(degrees), glm::normalize(axis));
+    this->rotation = glm::rotate(this->rotation, glm::radians(degrees), glm::normalize(glm::vec3(glm::inverse(this->rotation) * glm::vec4(axis,1.f))));
 };
 
 void Model::scale(float scale) {

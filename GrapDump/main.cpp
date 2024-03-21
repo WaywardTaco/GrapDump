@@ -37,7 +37,7 @@
 float
     mouseY = 0.f,
     mouseX = 0.f,
-    modelMoveSpd = 0.05f,
+    modelRotSpd = 10.f,
     lightRotSpd = 10.f,
     brightnessStep = 10.f,
     camPanSpeed = 0.5f;
@@ -305,7 +305,7 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
             light->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 1.f, 0.f, 0.f });
         }
         else
-            mainModel->move({ 0.f, modelMoveSpd, 0.f });
+            mainModel->rotate(modelRotSpd, {1.f, 0.f, 0.f});
         wPressed = false;
     }
     if (sPressed) {
@@ -314,7 +314,7 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
             light->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 1.f, 0.f, 0.f });
         }
         else
-            mainModel->move({ 0.f, -modelMoveSpd, 0.f });
+            mainModel->rotate(-modelRotSpd, { 1.f, 0.f, 0.f });
         sPressed = false;
     }
     if (dPressed) {
@@ -323,7 +323,7 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
             light->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 0.f, 1.f, 0.f });
         }
         else
-            mainModel->move({ -modelMoveSpd, 0.f, 0.f });
+            mainModel->rotate(modelRotSpd, { 0.f, 1.f, 0.f });
         dPressed = false;
     }
     if (aPressed) {
@@ -332,7 +332,7 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
             light->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 0.f, 1.f, 0.f });
         }
         else
-            mainModel->move({ modelMoveSpd, 0.f, 0.f });
+            mainModel->rotate(-modelRotSpd, { 0.f, 1.f, 0.f });
         aPressed = false;
     }
     if (ePressed) {
@@ -341,7 +341,7 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
             light->rotateAround({ 0.f, 0.f, 0.f }, lightRotSpd, { 0.f, 0.f, 1.f });
         }
         else
-            mainModel->move({ 0.f, 0.f, modelMoveSpd});
+            mainModel->rotate(modelRotSpd, { 0.f, 0.f, 1.f });
         ePressed = false;
     }
     if (qPressed) {
@@ -350,7 +350,7 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
             light->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 0.f, 0.f, 1.f });
         }
         else
-            mainModel->move({0.f, 0.f, -modelMoveSpd});
+            mainModel->rotate(-modelRotSpd, { 0.f, 0.f, 1.f });
         qPressed = false;
     }
     if (upPressed) {
