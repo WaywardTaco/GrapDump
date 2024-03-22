@@ -25,19 +25,25 @@ private:
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
-    GLuint VAO, VBO, texture;
+    GLuint VAO, VBO, texture, normalMap;
     std::vector<GLfloat> fullVertexData;
+
+    std::vector<glm::vec3> tangents;
+    std::vector<glm::vec3> bitangents;
 
     glm::vec3 position;
     glm::vec3 modelScale;
     glm::mat4 rotation;
 
     glm::vec3 modelBaseColor;
-    bool hasTexture;
+    bool 
+        hasTexture,
+        hasNormMap;
 
 public:
     Model(std::string modelPath, std::string texturePath);
     Model(std::string modelPath, glm::vec3 plainColor);
+    Model(std::string modelPath, std::string texturePath, std::string normalsMapPath);
     ~Model();
 
 public:

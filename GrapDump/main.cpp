@@ -85,32 +85,6 @@ void cursorCallback(GLFWwindow* window, double xPos, double yPos);
 void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight);
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
-/* BUGS / TODOS
-    Main object movement
-        - Own OBJ w/ Textures
-        Space - swap to light control (change light color)
-    Light Model
-        - Unlit but colored to light color for point light
-        - Direction Light at {4, -5, 0} pointing to center
-        AD - around the y
-        WS - around the x
-        QE - around the z
-        Space - swap to main object control (change color)
-        Up/Down - point light brightness
-        Left/Right - direction light brightness
-        - Direction light not tested yet
-        - Light shading doesnt handle multiple lightsources yet
-    POV Camera
-        - mouse rotates around the main model
-        - 2 for ortho
-    Ortho Camera
-        - sees point light and model
-        - 1 for perspective
-        - OrthoCamera looks weird when plugged in
-
-*/
-
-
 int main(void)
 {
     /* Initialize the library */
@@ -136,17 +110,32 @@ int main(void)
 
     glfwSetCursorPosCallback(window, cursorCallback);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,   // Source Factor (Foreground Layer)
+        GL_ONE_MINUS_SRC_ALPHA); // Destination Factor (Background Layer)
+    // Final Color = ForegroundColor * SourceFactor + BackgroundColor * DestinationFactor
+    // glBlendEquation(GL_FUNC_SUBTRACT); changes addition to subtraction
+    // See Website for Reference: Anders Riggelsen - Visual glBlendFunc and glBlendEquation Tool
 
     /* Light declaration */
-    PointLight* pointLight = new PointLight({ -15.f, 3.f, -5.f });
-    DirectionLight* directionLight = new DirectionLight({-4.f, 5.f, 0.f});
+    PointLight* pointLight = new PointLight({ 0.f, 3.f, -5.f });
+    pointLight->setBrightness(10.f);
 
-    Camera* currentCamera;
     PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
-    OrthoCamera* orthoCamera = new OrthoCamera();
+    
+    Model* mainModel = new Model("3D/djSword.obj", "3D/brickwall.jpg");
+    Model* yae = new Model("3D/djSword.obj", "3D/brickwall.jpg", "3D/brickwall_normal.jpg");
 
-    Model* mainModel = new Model("3D/djSword.obj", "3D/partenza.jpg");
-    Model* lightModel = new Model("3D/djSword.obj", glm::vec3{ 1.f, 1.f, 1.f });
+    yae->setScale(0.02f);
+    yae->setPosition({ 0.f, -0.5f, 0.f });
+    yae->rotate(90.f, { 0.f, 0.f, 1.f });
+    yae->rotate(180.f, {0.f, 1.f, 0.f});
+
+    mainModel->setScale(10.f);
+    mainModel->setPosition({ 0.f, 0.5f, 0.f });
+    mainModel->rotate(90.f, { 0.f, 0.f, 1.f });
+    mainModel->rotate(180.f, { 0.f, 1.f, 0.f });
+
 
     Skybox* sky = new Skybox(
         "Skybox/rainbow_rt.png",
@@ -155,16 +144,6 @@ int main(void)
         "Skybox/rainbow_dn.png",
         "Skybox/rainbow_ft.png",
         "Skybox/rainbow_bk.png");
-
-
-
-
-
-
-
-
-
-
 
     // Front-back texture fixing
     glEnable(GL_DEPTH_TEST); 
@@ -175,9 +154,7 @@ int main(void)
     
     perspectiveCamera->setPosition({0.f, 0.f, -1.f});
     mainModel->setScale(0.01f);
-    lightModel->setScale(0.01f);
-    lightModel->setPosition({-0.5f, 0.5f, 0.f});
-
+    
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -187,12 +164,16 @@ int main(void)
         sky->render(skyboxShader, (Camera*)perspectiveCamera);
         perspectiveCamera->apply(shaderProg);
         mainModel->render(shaderProg);
-        lightModel->render(shaderProg);
-        
+        yae->render(shaderProg);
+
+        mainModel->rotate(-0.05f, { 0.f, 1.f, 0.f });
+        yae->rotate(-0.05f, {0.f, 1.f, 0.f});
+
+
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
         glfwPollEvents();
-        processInput(perspectiveCamera, mainModel, lightModel, pointLight, directionLight);
+        //processInput(perspectiveCamera, mainModel, lightModel, pointLight, directionLight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
