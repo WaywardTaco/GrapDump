@@ -57,7 +57,8 @@ float
     window_height = 1000,
     window_width = 1000;
 
-bool 
+bool
+    inOrthoView = false,
     controllingLight = false,
     wPressed = false,
     aPressed = false,
@@ -82,7 +83,7 @@ bool
 GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void cursorCallback(GLFWwindow* window, double xPos, double yPos);
-void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight);
+void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* orthoCam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight);
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
 /* BUGS / TODOS
@@ -141,13 +142,15 @@ int main(void)
     PointLight* pointLight = new PointLight({ -15.f, 3.f, -5.f });
     DirectionLight* directionLight = new DirectionLight({-4.f, 5.f, 0.f});
 
-    Camera* currentCamera;
     PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
     OrthoCamera* orthoCamera = new OrthoCamera();
+    orthoCamera->setPosition({0.01f, 1.f, 0.f});
+    Camera* currentCamera = perspectiveCamera;
 
     Model* mainModel = new Model("3D/djSword.obj", "3D/partenza.jpg");
     Model* lightModel = new Model("3D/djSword.obj", glm::vec3{ 1.f, 1.f, 1.f });
 
+    /*
     Skybox* sky = new Skybox(
         "Skybox/rainbow_rt.png",
         "Skybox/rainbow_lf.png",
@@ -155,6 +158,7 @@ int main(void)
         "Skybox/rainbow_dn.png",
         "Skybox/rainbow_ft.png",
         "Skybox/rainbow_bk.png");
+    */
 
 
 
@@ -184,15 +188,15 @@ int main(void)
         /* Lighting */
         pointLight->apply(shaderProg);
         
-        sky->render(skyboxShader, (Camera*)perspectiveCamera);
-        perspectiveCamera->apply(shaderProg);
+        // sky->render(skyboxShader, (Camera*)perspectiveCamera);
+        currentCamera->apply(shaderProg);
         mainModel->render(shaderProg);
         lightModel->render(shaderProg);
         
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
         glfwPollEvents();
-        processInput(perspectiveCamera, mainModel, lightModel, pointLight, directionLight);
+        processInput(&currentCamera, perspectiveCamera, orthoCamera, mainModel, lightModel, pointLight, directionLight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
@@ -298,7 +302,7 @@ void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 
-void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight) {
+void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* orthoCam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight) {
     if (wPressed) {
         if (controllingLight) {
             pointLight->rotateAround({ 0.f, 0.f, 0.f }, -lightRotSpd, { 1.f, 0.f, 0.f });
@@ -371,10 +375,14 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
     }
     if (onePressed) {
         // Cam is set to Perspective
+        *cam = perspectiveCam;
+        inOrthoView = false;
         onePressed = false;
     }
     if (twoPressed) {
         // Cam is set to ortho
+        *cam = orthoCam;
+        inOrthoView = true;
         twoPressed = false;
     }
     if (spacePressed) {
@@ -388,20 +396,23 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
         light->setBaseColor(lightColors[lightColIndex]);
         spacePressed = false;
     }
+    if (inOrthoView)
+        return;
+
     if (mouseUp) {
-        cam->rotateAround(camPanSpeed, {1.f, 0.f, 0.f});
+        (*cam)->rotateAround(camPanSpeed, { 1.f, 0.f, 0.f });
         mouseUp = false;
     }
     if (mouseDown) {
-        cam->rotateAround(-camPanSpeed, { 1.f, 0.f, 0.f });
+        (*cam)->rotateAround(-camPanSpeed, { 1.f, 0.f, 0.f });
         mouseDown = false;
     }
     if (mouseRight) {
-        cam->rotateAround(camPanSpeed, { 0.f, 1.f, 0.f });
+        (*cam)->rotateAround(camPanSpeed, { 0.f, 1.f, 0.f });
         mouseRight = false;
     }
     if (mouseLeft) {
-        cam->rotateAround(-camPanSpeed, { 0.f, 1.f, 0.f });
+        (*cam)->rotateAround(-camPanSpeed, { 0.f, 1.f, 0.f });
         mouseLeft = false;
     }
 }
