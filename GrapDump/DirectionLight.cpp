@@ -8,8 +8,28 @@ DirectionLight::DirectionLight(glm::vec3 direction)
 	: LightSource(), direction(glm::normalize(direction)) {}
 
 void DirectionLight::apply(GLuint shaderProgram) {
-	LightSource::apply(shaderProgram);
+    glUseProgram(shaderProgram);
 
+    GLuint dirAdrs = glGetUniformLocation(shaderProgram, "dirLight.direction");
+    glUniform3fv(dirAdrs, 1, glm::value_ptr(this->direction));
+
+    GLuint colorAdrs = glGetUniformLocation(shaderProgram, "dirLight.color");
+    glUniform3fv(colorAdrs, 1, glm::value_ptr(this->color));
+
+    GLuint brightAdrs = glGetUniformLocation(shaderProgram, "dirLight.brightness");
+    glUniform1f(brightAdrs, this->brightness);
+
+    GLuint ambStrAdrs = glGetUniformLocation(shaderProgram, "dirlight.ambientStr");
+    glUniform1f(ambStrAdrs, this->ambientStrength);
+
+    GLuint ambColorAdrs = glGetUniformLocation(shaderProgram, "dirLight.ambientCol");
+    glUniform3fv(ambColorAdrs, 1, glm::value_ptr(this->ambientColor));
+
+    GLuint specStrAdrs = glGetUniformLocation(shaderProgram, "dirLight.specStr");
+    glUniform1f(specStrAdrs, this->specularStrength);
+
+    GLuint specPhongAdrs = glGetUniformLocation(shaderProgram, "dirLight.specPhong");
+    glUniform1f(specPhongAdrs, this->specularPhong);
 }
 
 void DirectionLight::setDirection(glm::vec3 direction) {

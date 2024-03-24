@@ -87,28 +87,7 @@ void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* 
 void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
 /* BUGS / TODOS
-    Main object movement
         - Own OBJ w/ Textures
-        Space - swap to light control (change light color)
-    Light Model
-        - Unlit but colored to light color for point light
-        - Direction Light at {4, -5, 0} pointing to center
-        AD - around the y
-        WS - around the x
-        QE - around the z
-        Space - swap to main object control (change color)
-        Up/Down - point light brightness
-        Left/Right - direction light brightness
-        - Direction light not tested yet
-        - Light shading doesnt handle multiple lightsources yet
-    POV Camera
-        - mouse rotates around the main model
-        - 2 for ortho
-    Ortho Camera
-        - sees point light and model
-        - 1 for perspective
-        - OrthoCamera looks weird when plugged in
-
 */
 
 
@@ -137,38 +116,21 @@ int main(void)
 
     glfwSetCursorPosCallback(window, cursorCallback);
 
-
     /* Light declaration */
     PointLight* pointLight = new PointLight({ -15.f, 3.f, -5.f });
-    DirectionLight* directionLight = new DirectionLight({-4.f, 5.f, 0.f});
+    pointLight->setBrightness(150.f);
+    DirectionLight* directionLight = new DirectionLight(glm::vec3(0.f) - glm::vec3( 4.f, - 5.f, 0.f ));
+    directionLight->setBrightness(2.f);
 
     PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
     OrthoCamera* orthoCamera = new OrthoCamera();
-    orthoCamera->setPosition({0.01f, 1.f, 0.f});
+    orthoCamera->setWorldUp({0.0f, 0.f, 1.f});
+    orthoCamera->setPosition({0.f, 1.f, 0.f});
     Camera* currentCamera = perspectiveCamera;
 
     Model* mainModel = new Model("3D/djSword.obj", "3D/partenza.jpg");
-    Model* lightModel = new Model("3D/djSword.obj", glm::vec3{ 1.f, 1.f, 1.f });
-
-    /*
-    Skybox* sky = new Skybox(
-        "Skybox/rainbow_rt.png",
-        "Skybox/rainbow_lf.png",
-        "Skybox/rainbow_up.png",
-        "Skybox/rainbow_dn.png",
-        "Skybox/rainbow_ft.png",
-        "Skybox/rainbow_bk.png");
-    */
-
-
-
-
-
-
-
-
-
-
+    Model* lightModel = new Model("3D/sphere.obj", lightColors[lightColIndex]);
+    // Sphere.obj Source: https://thangs.com/designer/GeorgeDebarr/3d-model/sphere.obj-217158
 
     // Front-back texture fixing
     glEnable(GL_DEPTH_TEST); 
@@ -187,6 +149,7 @@ int main(void)
     {
         /* Lighting */
         pointLight->apply(shaderProg);
+        directionLight->apply(shaderProg);
         
         // sky->render(skyboxShader, (Camera*)perspectiveCamera);
         currentCamera->apply(shaderProg);

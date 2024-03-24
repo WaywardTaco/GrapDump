@@ -92,6 +92,10 @@ void Camera::setProjection(glm::mat4 projection) {
     this->projection = projection;
 };
 
+void Camera::setWorldUp(glm::vec3 worldUp) {
+    this->worldUp = glm::normalize(worldUp);
+}
+
 glm::mat4 Camera::getViewMat() {
     return glm::lookAt(this->position, this->center, this->worldUp);
 }

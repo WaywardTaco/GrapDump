@@ -9,7 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 class LightSource {
-private:
+protected:
 	glm::vec3
 		color,
 		ambientColor;
@@ -21,7 +21,7 @@ private:
 
 public:
 	LightSource();
-	virtual void apply(GLuint shaderProgram);
+	virtual void apply(GLuint shaderProgram) = 0;
 
 	void setColor(glm::vec3 color);
 	void setAmbientColor(glm::vec3 color);

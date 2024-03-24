@@ -30,6 +30,7 @@ public:
 	void setPosition(glm::vec3 position);
 	void setCenter(glm::vec3 center);
 	void setProjection(glm::mat4 projection);
+	void setWorldUp(glm::vec3 worldUp);
 
 	glm::mat4 getViewMat();
 	glm::mat4 getProjection();
