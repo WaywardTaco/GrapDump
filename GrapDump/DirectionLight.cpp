@@ -2,12 +2,15 @@
 #include "DirectionLight.hpp"
 
 DirectionLight::DirectionLight()
+    // Default Direction Light from straight above
 	: LightSource(), direction({ 0.f, -1.f, 0.f }) {}
 
-DirectionLight::DirectionLight(glm::vec3 direction)
-	: LightSource(), direction(glm::normalize(direction)) {}
+DirectionLight::DirectionLight(glm::vec3 direction) : LightSource(), 
+    // Inputed Direction is normalized for consistency
+    direction(glm::normalize(direction)) {}
 
 void DirectionLight::apply(GLuint shaderProgram) {
+    // Application of Direction Light Values to shader program variables
     glUseProgram(shaderProgram);
 
     GLuint dirAdrs = glGetUniformLocation(shaderProgram, "dirLight.direction");
@@ -37,6 +40,7 @@ void DirectionLight::setDirection(glm::vec3 direction) {
 }
 
 void DirectionLight::rotate(float degrees, glm::vec3 axis) {
+    // Rotation of direction w/ respect to world origin
 	glm::mat4 transform = glm::rotate(glm::mat4(1.f), glm::radians(degrees), glm::normalize(axis));
 	this->direction = glm::normalize(glm::vec3(transform * glm::vec4(this->direction, 1.f)));
 }

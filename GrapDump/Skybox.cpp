@@ -1,5 +1,4 @@
 
-
 #include "Skybox.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -133,6 +132,7 @@ Skybox::Skybox(
 }
 
 void Skybox::render(GLuint shaderProgram, Camera* camera) {
+    // Usage of shader program & application of relevant variables
     glUseProgram(shaderProgram);
     glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
@@ -146,11 +146,13 @@ void Skybox::render(GLuint shaderProgram, Camera* camera) {
     unsigned int projectionAdrs = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projectionAdrs, 1, GL_FALSE, glm::value_ptr(camera->getProjection()));
 
+    // Rendering of skybox
     glBindVertexArray(this->VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->texture);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
+    // Unbinding cleanup
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindVertexArray(0);
     

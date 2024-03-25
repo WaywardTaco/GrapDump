@@ -16,15 +16,18 @@
 #include <vector>
 #include <iostream>
 
+// STBI include guard
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #include "stb_image.h"
 #endif
 
+// TinyObj include guard
 #ifndef INCLUDE_TINYOBJ
 #define INCLUDE_TINYOBJ
 #include "tiny_obj_loader.h"
 #endif
 
+// Object HPPs
 #include "Model.hpp"
 #include "Camera.hpp"
 #include "PerspectiveCamera.hpp"
@@ -34,7 +37,10 @@
 #include "PointLight.hpp"
 #include "DirectionLight.hpp"
 
+// Global Variables
 float
+    window_height = 1000,
+    window_width = 1000,
     mouseY = 0.f,
     mouseX = 0.f,
     modelRotSpd = 10.f,
@@ -42,6 +48,8 @@ float
     brightnessStep = 10.f,
     camPanSpeed = 0.5f;
 
+// Lights for point light
+int lightColIndex = 0;
 glm::vec3 lightColors[] = {
     {1.f, 1.f, 1.f},
     {1.f, 0.f, 0.f},
@@ -51,12 +59,8 @@ glm::vec3 lightColors[] = {
     {0.f, 0.f, 1.f},
     {1.f, 0.f, 1.f}
 };
-int lightColIndex = 0;
 
-float
-    window_height = 1000,
-    window_width = 1000;
-
+// Flags for Input handling
 bool
     inOrthoView = false,
     controllingLight = false,
@@ -78,85 +82,83 @@ bool
     mouseLeft = false,
     mouseRight = false;
 
-/**********************************************************************/
-
+// Function Predefs
 GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void cursorCallback(GLFWwindow* window, double xPos, double yPos);
 void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* orthoCam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight);
-void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
-/* BUGS / TODOS
-        - Own OBJ w/ Textures
-*/
-
+/**********************************************************************/
 
 int main(void)
 {
-    /* Initialize the library */
+    /* START INITIALIZATIONS */
+    // Window Init
     if (!glfwInit())
         return -1;
-
-    /* Create a windowed mode window and its OpenGL context */
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Josiah Aviso", NULL, NULL);
-
+    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Aviso & Baniqued", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
     }
-
     glfwMakeContextCurrent(window);
-
-    /* Initializations */
+    // Glad INIT
     gladLoadGL();
+    // Input INIT
     glfwSetKeyCallback(window, keyCallback);
-
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
     glfwSetCursorPosCallback(window, cursorCallback);
-
-    /* Light declaration */
-    PointLight* pointLight = new PointLight({ -15.f, 3.f, -5.f });
-    pointLight->setBrightness(150.f);
-    DirectionLight* directionLight = new DirectionLight(glm::vec3(0.f) - glm::vec3( 4.f, - 5.f, 0.f ));
-    directionLight->setBrightness(2.f);
-
-    PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
-    OrthoCamera* orthoCamera = new OrthoCamera();
-    orthoCamera->setWorldUp({0.0f, 0.f, 1.f});
-    orthoCamera->setPosition({0.f, 1.f, 0.f});
-    Camera* currentCamera = perspectiveCamera;
-
-    Model* mainModel = new Model("3D/djSword.obj", "3D/partenza.jpg");
-    Model* lightModel = new Model("3D/sphere.obj", lightColors[lightColIndex]);
-    // Sphere.obj Source: https://thangs.com/designer/GeorgeDebarr/3d-model/sphere.obj-217158
-
-    // Front-back texture fixing
-    glEnable(GL_DEPTH_TEST); 
-
+    // Shader Init
     GLuint shaderProg = compShaderProg("Shader/sample.vert", "Shader/sample.frag");
-    GLuint skyboxShader = compShaderProg("Shader/Skybox.vert", "Shader/Skybox.frag");
+    glEnable(GL_DEPTH_TEST); 
+    /* END INITIALIZATIONS*/
 
-    
-    perspectiveCamera->setPosition({0.f, 0.f, -1.f});
-    mainModel->setScale(0.01f);
+    /* START OBJECT DECLARATIONS */
+
+    /* Point Light */
+    // Sphere.obj from: https://thangs.com/designer/GeorgeDebarr/3d-model/sphere.obj-217158
+    PointLight* pointLight = new PointLight({ -15.f, 3.f, -5.f });
+    Model* lightModel = new Model("3D/sphere.obj", lightColors[lightColIndex]);
+    pointLight->setBrightness(150.f);
     lightModel->setScale(0.01f);
     lightModel->setPosition({-0.5f, 0.5f, 0.f});
+
+    /* Direction Light */
+    DirectionLight* directionLight = new DirectionLight(
+        glm::vec3(0.f) - glm::vec3( 4.f, - 5.f, 0.f ) // Light Direction calculation for a light at {4, -5, 0} pointing towards center
+    ); 
+    directionLight->setBrightness(2.f);
+
+    /* Perspective Cam */
+    PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
+    perspectiveCamera->setPosition({0.f, 0.f, -1.f});
+    
+    /* Orthographic Cam */
+    OrthoCamera* orthoCamera = new OrthoCamera();
+    orthoCamera->setWorldUp({0.0f, 0.f, 1.f});  // For Controls to be aligned properly
+    orthoCamera->setPosition({0.f, 1.f, 0.f});  // Top-down view
+    
+    /* Main Model */
+    Model* mainModel = new Model("3D/djSword.obj", "3D/partenza.jpg");
+    mainModel->setScale(0.01f);
+    
+    /* Currently Active Camera */
+    Camera* currentCamera = perspectiveCamera;
+
+    /* END OBJECT DECLARATIONS */
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        /* Lighting */
+        /* Application & Rendering of Objects */
         pointLight->apply(shaderProg);
         directionLight->apply(shaderProg);
-        
-        // sky->render(skyboxShader, (Camera*)perspectiveCamera);
         currentCamera->apply(shaderProg);
         mainModel->render(shaderProg);
         lightModel->render(shaderProg);
         
-        /* Render Frame and Wait for inputs, then resets window & depth buffer */
+        /* Render Frame and Wait for inputs, then processes inputs and resets window & depth buffer */
         glfwSwapBuffers(window);
         glfwPollEvents();
         processInput(&currentCamera, perspectiveCamera, orthoCamera, mainModel, lightModel, pointLight, directionLight);
@@ -207,6 +209,7 @@ GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc) {
     return shaderProg;
 };
 
+/* For keyboard input handling */
 void keyCallback(
     GLFWwindow* window,     // Pointer to the window being checked
     int key,                // the keycode being pressed
@@ -249,6 +252,7 @@ void keyCallback(
         twoPressed = true;
 }
 
+/* For mouse cursor input */
 void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
 
     if (ypos > mouseY)
@@ -264,7 +268,7 @@ void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
     mouseY = ypos;
 }
 
-
+/* Flag resolution */
 void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* orthoCam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight) {
     if (wPressed) {
         if (controllingLight) {
@@ -337,13 +341,11 @@ void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* 
         leftPressed = false;
     }
     if (onePressed) {
-        // Cam is set to Perspective
         *cam = perspectiveCam;
         inOrthoView = false;
         onePressed = false;
     }
     if (twoPressed) {
-        // Cam is set to ortho
         *cam = orthoCam;
         inOrthoView = true;
         twoPressed = false;
@@ -359,6 +361,8 @@ void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* 
         light->setBaseColor(lightColors[lightColIndex]);
         spacePressed = false;
     }
+
+    // Disables camera movement while in orthographic
     if (inOrthoView)
         return;
 
@@ -371,74 +375,11 @@ void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* 
         mouseDown = false;
     }
     if (mouseRight) {
-        (*cam)->rotateAround(camPanSpeed, { 0.f, 1.f, 0.f });
+        (*cam)->rotateAround(-camPanSpeed, { 0.f, 1.f, 0.f });
         mouseRight = false;
     }
     if (mouseLeft) {
-        (*cam)->rotateAround(-camPanSpeed, { 0.f, 1.f, 0.f });
+        (*cam)->rotateAround(camPanSpeed, { 0.f, 1.f, 0.f });
         mouseLeft = false;
     }
 }
-
-void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv) {
-    unsigned int varLoc = glGetUniformLocation(shaderProg, variable);
-    glUniformMatrix4fv(varLoc, 1, GL_FALSE, glm::value_ptr(matrix4fv));
-}
-
-/* Older Notes */
-/*
-glm::mat4 getViewMatrix(glm::vec3 cameraPos, glm::vec3 center) {
-
-    glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
-
-    glm::mat4 eyePosition = glm::translate(glm::mat4(1.f),
-        cameraPos * -1.f);  // times -1 since matrix takes negative position to transform the world
-
-    glm::vec3 forwardVec = glm::normalize(glm::vec3(center - cameraPos));
-    glm::vec3 rightVec = glm::normalize(glm::cross(forwardVec, WorldUp));
-    glm::vec3 upVec = glm::normalize(glm::cross(rightVec, forwardVec));
-
-    glm::mat4 eyeOrient = glm::mat4(1.f);
-
-    // [Col][Row]
-    eyeOrient[0][0] = rightVec.x;
-    eyeOrient[1][0] = rightVec.y;
-    eyeOrient[2][0] = rightVec.z;
-
-    eyeOrient[0][1] = upVec.x;
-    eyeOrient[1][1] = upVec.y;
-    eyeOrient[2][1] = upVec.z;
-
-    eyeOrient[0][2] = - forwardVec.x;
-    eyeOrient[1][2] = - forwardVec.x;
-    eyeOrient[2][2] = - forwardVec.x;
-
-    glm::mat4 viewMatrix = eyeOrient * eyePosition;
-
-    return viewMatrix;
-};
-*/
-
-
-    // Sample Code
-    // unsigned int xLoc = glGetUniformLocation(shaderProg, "x"); // Grabs variable named 'x' from the shader
-    // glUniform1f(xLoc, x_mod); // Assigns one float from x_mod to xLoc which refers to x in the shader
-    // unsigned int yLoc = glGetUniformLocation(shaderProg, "y");
-    // glUniform1f(yLoc, y_mod);
-
-    /*
-    glDrawArrays(
-        GL_TRIANGLES,       // Type of primitives drawn
-        0,                  // Start from index 0
-        3                   // Number of components
-    );
-    */
-
-    /*Renders model with reference to an imaginary window with reference to the actul window
-       glViewport(
-           0,      // Minimum x
-           0,      // Minimum y
-           1200,    // Max x, width
-           600     // Max y, height
-       );
-       */

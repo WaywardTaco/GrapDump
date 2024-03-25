@@ -2,6 +2,7 @@
 #include "LightSource.hpp"
 
 LightSource::LightSource() :
+	// Default Light Source values
 	color(1.f), ambientColor(1.f), brightness(1.f),
 	ambientStrength(0.5f), specularStrength(0.5f), specularPhong(16.f) {}
 

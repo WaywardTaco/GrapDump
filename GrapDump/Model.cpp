@@ -3,10 +3,11 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 
+/* Loading of Model with texture */
 Model::Model(std::string modelPath, std::string texturePath) :
     position(0.f), modelScale(1.f), rotation(1.f), modelBaseColor(1.f), hasTexture(true)
 {
-
+    /* Model Loading */
     this->success = tinyobj::LoadObj(
         &this->attributes,
         &this->shapes,
@@ -47,7 +48,7 @@ Model::Model(std::string modelPath, std::string texturePath) :
     GLintptr normalsPtr = 3 * sizeof(float);
     GLintptr uvPtr = 6 * sizeof(float);
 
-    /* Data Layer | Component Count for X, Y, Z | Data Type | If Normalized | Size of a Vertex (w/ UV) | Stride value (offset) */
+    /* Data Layer | Component Count for X, Y, Z | Data Type | If Normalized | Size of a Vertex (w/ Normals & UV) | Stride value (offset) */
     /* 0 is Pos, 2 is UV */
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)normalsPtr);
@@ -99,11 +100,9 @@ Model::Model(std::string modelPath, std::string texturePath) :
 
     }
 
-
     /* Mipmaps: Smaller versions of a loaded texture for optimized lowres versions of image at a distance */
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(tex_bytes); // Free the previously loaded textures
-
 
     /* Clear Editing VAO and VBO */
     glBindVertexArray(0);
@@ -111,10 +110,10 @@ Model::Model(std::string modelPath, std::string texturePath) :
     stbi_set_flip_vertically_on_load(false);
 };
 
+/* Loading of Model without textures */
 Model::Model(std::string modelPath, glm::vec3 plainColor) :
     position(0.f), modelScale(1.f), rotation(1.f), modelBaseColor(plainColor), hasTexture(false), texture(0)
 {
-
     this->success = tinyobj::LoadObj(
         &this->attributes,
         &this->shapes,
@@ -128,7 +127,7 @@ Model::Model(std::string modelPath, glm::vec3 plainColor) :
 
         tinyobj::index_t vData = this->shapes[0].mesh.indices[i];
 
-        /* Load X, Y, Z, Nx, Ny, Nz, U, and V data */
+        /* Load X, Y, Z, Nx, Ny, and Nz data */
         this->fullVertexData.push_back(this->attributes.vertices[(vData.vertex_index * 3)]);
         this->fullVertexData.push_back(this->attributes.vertices[(vData.vertex_index * 3) + 1]);
         this->fullVertexData.push_back(this->attributes.vertices[(vData.vertex_index * 3) + 2]);
@@ -148,11 +147,10 @@ Model::Model(std::string modelPath, glm::vec3 plainColor) :
     /* Type of Buffer Data | Size of array to copy | Array to copy | For render optimization */
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * this->fullVertexData.size(), this->fullVertexData.data(), GL_DYNAMIC_DRAW);
 
-    /* Normals and UV Offset for data loading */
+    /* Normals Offset for data loading */
     GLintptr normalsPtr = 3 * sizeof(float);
 
-    /* Data Layer | Component Count for X, Y, Z | Data Type | If Normalized | Size of a Vertex (w/ UV) | Stride value (offset) */
-    /* 0 is Pos, 2 is UV */
+    /* Data Layer | Component Count for X, Y, Z | Data Type | If Normalized | Size of a Vertex (w/ Normals) | Stride value (offset) */
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)normalsPtr);
     glEnableVertexAttribArray(0);
@@ -169,6 +167,7 @@ Model::~Model() {
 }
 
 void Model::render(GLuint shaderProgram) {
+    // Rendering of the model by passing relevant variables to shader program
     glUseProgram(shaderProgram); 
     
     glm::mat4 transform(1.f);
@@ -185,12 +184,11 @@ void Model::render(GLuint shaderProgram) {
     unsigned int hasTexAdrs = glGetUniformLocation(shaderProgram, "modelHasTexture");
     glUniform1i(hasTexAdrs, this->hasTexture);
 
-    /* Texture stuff */
     GLuint tex0Adrs = glGetUniformLocation(shaderProgram, "tex0");
     glBindTexture(GL_TEXTURE_2D, this->texture);
     glUniform1i(tex0Adrs, 0); // 0 is the index of the texture
 
-    /* Render VAO w/ shader */
+    /* Actual rendering of model */
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
     glBindVertexArray(this->VAO);
@@ -225,45 +223,10 @@ void Model::setPosition(glm::vec3 position) {
 };
 
 void Model::rotateAround(glm::vec3 center, float degrees, glm::vec3 axis) {
-    glm::vec3 worldUp = { 0.f, 1.f, 0.f };
-
-    glm::vec3 forwardVec = { 0.f, 0.f, 1.f };
-    glm::vec3 rightVec = glm::normalize(glm::cross(forwardVec, worldUp));
-
-    glm::vec3 upVec = glm::normalize(glm::cross(rightVec, forwardVec));
-
-    glm::mat4 cameraTransform = glm::mat4(1.f);
-
-    // [Col][Row]
-    cameraTransform[0][0] = rightVec.x;
-    cameraTransform[0][1] = rightVec.y;
-    cameraTransform[0][2] = rightVec.z;
-
-    cameraTransform[1][0] = upVec.x;
-    cameraTransform[1][1] = upVec.y;
-    cameraTransform[1][2] = upVec.z;
-
-    cameraTransform[2][0] = forwardVec.x;
-    cameraTransform[2][1] = forwardVec.y;
-    cameraTransform[2][2] = forwardVec.z;
-
-    glm::vec3 transformedAxis = glm::normalize(glm::vec3(cameraTransform * glm::vec4(glm::normalize(axis), 1.f)));
-
-
+    // Rotation about the origin
     glm::mat4 positionTransform = glm::mat4(1.f);
-    positionTransform = glm::rotate(positionTransform, glm::radians(degrees), transformedAxis);
-
+    positionTransform = glm::rotate(positionTransform, glm::radians(degrees), glm::normalize(axis));
     this->position = glm::vec3(positionTransform * glm::vec4(this->position, 1.f));
-
-    // Get the basis vectors centered on the camera center
-    // Turn into a basis transform matrix
-    // Find the axis of rotation in that new basis
-    // Rotate the basis across that axis
-    // Apply transform to the relative position of the camera
-
-
-    // Transform the camera position with respect to the axis of transform of the center (ie. figure out the rotation about the axis in the new vector space)
-    // Then apply the same transform as usual to the postion with respect to that axis to the camera
 }
 
 void Model::setRotation(float degrees, glm::vec3 axis) {

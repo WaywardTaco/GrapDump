@@ -1,6 +1,7 @@
 
 #version 330 core
 
+// Structs for Direction & Position Lights for convenient data input
 struct DirLight {
 	vec3 direction;
 
@@ -27,6 +28,7 @@ struct PointLight {
 	float specStr;
 };
 
+// Function predefs for calculating Lighting
 vec3 calcDirLighting(DirLight light, vec3 pointNorm, vec3 viewDir);
 vec3 calcPointLighting(PointLight light, vec3 pointNorm, vec3 fragPos, vec3 viewDir);
 
@@ -34,18 +36,21 @@ in vec3 fragPos;
 in vec3 normCoord;
 in vec2 texCoord; 
 
+// For handling non-textured vs textured models
 uniform bool modelHasTexture;
 uniform vec3 modelBaseColor;
 uniform sampler2D tex0; 
 
 uniform vec3 cameraPos;
 
+// Light uniforms
 uniform DirLight dirLight;
 uniform PointLight pointLight;
 
 out vec4 FragColor; 
 
 void main() {
+	// Non-textured model handling
 	if(!modelHasTexture){
 		FragColor = vec4(modelBaseColor, 1.0);
 		return;
@@ -54,6 +59,7 @@ void main() {
 	vec3 viewDir = normalize(cameraPos - fragPos);
 	vec3 pointNorm = normalize(normCoord);
 
+	// Additive Lighting
 	vec3 lighting = vec3(0.0);
 	lighting += calcDirLighting(dirLight, pointNorm, viewDir);
 	lighting += calcPointLighting(pointLight, pointNorm, fragPos, viewDir);
@@ -62,6 +68,7 @@ void main() {
 }
 
 vec3 calcDirLighting(DirLight light, vec3 pointNorm, vec3 viewDir){
+	// Light Dir based on light direcection only
 	vec3 lightDir = normalize(-light.direction);
 	
 	float diff = max(dot(pointNorm, lightDir), 0.0);
@@ -80,9 +87,11 @@ vec3 calcDirLighting(DirLight light, vec3 pointNorm, vec3 viewDir){
 }
 
 vec3 calcPointLighting(PointLight light, vec3 pointNorm, vec3 fragPos, vec3 viewDir){
+	// Distance calculated for lighting adjustments
 	float distance = length(light.position - fragPos);
 	float distMult = 1.0 / (distance * distance);
 	
+	// Light Dir based on fragment & light positions
 	vec3 lightDir = normalize(light.position - fragPos);
 	
 	float diff = max(dot(pointNorm, lightDir), 0.0);
@@ -94,6 +103,7 @@ vec3 calcPointLighting(PointLight light, vec3 pointNorm, vec3 fragPos, vec3 view
 	float spec = pow(max(dot(reflectDir, viewDir), 0.0), light.specPhong) ;
 	vec3 specular = spec * light.specStr * light.color ;
 
+	// Adjustment of light based on distance
 	diffuse *= distMult;
 	ambient *= distMult;
 	specular *= distMult;
