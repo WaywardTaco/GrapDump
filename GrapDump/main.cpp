@@ -352,14 +352,17 @@ void processInput(Camera** cam, PerspectiveCamera* perspectiveCam, OrthoCamera* 
         twoPressed = false;
     }
     if (spacePressed) {
-        if (controllingLight)
+        if (controllingLight) {
             controllingLight = false;
-        else
+        }   
+        else {
             controllingLight = true;
+            lightColIndex = (lightColIndex + 1) % 7;
+            pointLight->setColor(lightColors[lightColIndex]);
+            light->setBaseColor(lightColors[lightColIndex]);
+        }
+           
 
-        lightColIndex = (lightColIndex + 1) % 7;
-        pointLight->setColor(lightColors[lightColIndex]);
-        light->setBaseColor(lightColors[lightColIndex]);
         spacePressed = false;
     }
 
