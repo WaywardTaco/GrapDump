@@ -119,7 +119,7 @@ int main(void)
     /* Point Light */
     // Sphere.obj from: https://thangs.com/designer/GeorgeDebarr/3d-model/sphere.obj-217158
     PointLight* pointLight = new PointLight({ -15.f, 3.f, -5.f });
-    Model* lightModel = new Model("3D/sphere.obj", lightColors[lightColIndex]);
+    Model* lightModel = new Model("3D/Sphere.obj", lightColors[lightColIndex]);
     pointLight->setBrightness(150.f);
     lightModel->setScale(0.01f);
     lightModel->setPosition({-0.5f, 0.5f, 0.f});
@@ -140,8 +140,9 @@ int main(void)
     orthoCamera->setPosition({0.f, 1.f, 0.f});  // Top-down view
     
     /* Main Model */
-    Model* mainModel = new Model("3D/djSword.obj", "3D/partenza.jpg");
-    mainModel->setScale(0.01f);
+    // Aircraft.obj and Aircraft.jpg from: https://free3d.com/3d-model/e-45-aircraft-71823.html
+    Model* mainModel = new Model("3D/Aircraft.obj", "3D/Aircraft.jpg");
+    mainModel->setScale(0.20f);
     
     /* Currently Active Camera */
     Camera* currentCamera = perspectiveCamera;
