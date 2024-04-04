@@ -57,6 +57,7 @@ public:
     void scale(glm::vec3 scale);
 
     glm::vec3 getPosition();
+    glm::mat4 getRotation();
 
     void setPosition(glm::vec3 position);
     void rotateAround(glm::vec3 center, float degrees, glm::vec3 axis);

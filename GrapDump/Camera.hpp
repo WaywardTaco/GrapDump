@@ -28,10 +28,14 @@ public:
 
 	void moveBy(glm::vec3 move);
 	void moveTo(glm::vec3 move);
-	void rotateAround(float degrees, glm::vec3 axis);
+	void rotateAround(glm::vec3 center, float degrees, glm::vec3 axis);
 	void turn(float degrees, glm::vec3 axis);
 
 	void setPosition(glm::vec3 position);
 	void setCenter(glm::vec3 center);
 	void setProjection(glm::mat4 projection);
+	void setWorldUp(glm::vec3 worldUp);
+
+	glm::mat4 getViewMat();
+	glm::vec3 getCenter();
 };

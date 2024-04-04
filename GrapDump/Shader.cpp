@@ -1,5 +1,6 @@
 
 #include "Shader.hpp"
+#include <iostream>
 
 Shader::Shader(std::string vertex_shader_source_path, std::string fragment_shader_source_path) {
     /* Read the source files into character pointers */
@@ -48,26 +49,31 @@ void Shader::use() {
 }
 
 void Shader::passFloat(const char* var_name, float value) {
+    glUseProgram(this->shader_program);
     unsigned int address = glGetUniformLocation(this->shader_program, var_name);
     glUniform1f(address, value);
 }
 
 void Shader::passBool(const char* var_name, bool value) {
+    glUseProgram(this->shader_program);
     unsigned int address = glGetUniformLocation(this->shader_program, var_name);
     glUniform1i(address, value);
 }
 
 void Shader::passVec3(const char* var_name, glm::vec3 value) {
+    glUseProgram(this->shader_program);
     unsigned int address = glGetUniformLocation(this->shader_program, var_name);
     glUniform3fv(address, 1, glm::value_ptr(value));
 }
 
 void Shader::passMat4(const char* var_name, glm::mat4 value) {
+    glUseProgram(this->shader_program);
     unsigned int address = glGetUniformLocation(this->shader_program, var_name);
     glUniformMatrix4fv(address, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::pass2DTexture(const char* var_name, GLuint texture, int tex_index) {
+    glUseProgram(this->shader_program);
     if (tex_index == 0)
         glActiveTexture(GL_TEXTURE0);
     else if (tex_index == 1)

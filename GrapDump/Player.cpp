@@ -20,7 +20,7 @@ Player::Player(Model* ship, PointLight* spotlight, PerspectiveCamera* firstPOV, 
 	this->thirdPOV->setCenter(shipCenter);
 }
 
-void Player::renderApply(Shader* normal_shader, Shader* monochrome_shader, Shader* skybox_shader) {
+void Player::apply(Shader* normal_shader, Shader* monochrome_shader, Shader* skybox_shader) {
 	Shader* model_shader = normal_shader;
 
 	if (this->currentCam == this->firstPOV)
@@ -28,6 +28,14 @@ void Player::renderApply(Shader* normal_shader, Shader* monochrome_shader, Shade
 	
 	this->currentCam->apply(model_shader, skybox_shader);
 	this->spotlight->apply(model_shader);
+}
+
+void Player::render(Shader* normal_shader, Shader* monochrome_shader) {
+	Shader* model_shader = normal_shader;
+
+	if (this->currentCam == this->firstPOV)
+		model_shader = monochrome_shader;
+
 	this->ship->render(model_shader);
 }
 
@@ -36,22 +44,22 @@ glm::vec3 Player::getPosition() {
 }
 
 void Player::move(glm::vec3 movement) {
-	this->ship->move(movement);
-	this->spotlight->move(movement);
-	this->firstPOV->moveBy(movement);
-	this->thirdPOV->moveBy(movement);
+	this->ship->move(glm::vec3(this->ship->getRotation() * glm::vec4(movement, 1.0)));
+	this->spotlight->move(glm::vec3(this->ship->getRotation() * glm::vec4(movement, 1.0)));
+	this->firstPOV->moveBy(glm::vec3(this->ship->getRotation() * glm::vec4(movement, 1.0)));
+	this->thirdPOV->moveBy(glm::vec3(this->ship->getRotation() * glm::vec4(movement, 1.0)));
 }
 
 void Player::turn(float degrees, glm::vec3 axis) {
 	this->ship->rotate(degrees, axis);
-	this->spotlight->rotateAround(this->ship->getPosition(), degrees, -axis);
-	this->firstPOV->turn(degrees, axis);
-	this->thirdPOV->rotateAround(degrees, axis);
+	this->spotlight->rotateAround(this->ship->getPosition(), degrees, axis);
+	this->firstPOV->rotateAround(this->ship->getPosition(), degrees, axis);
+	this->thirdPOV->rotateAround(this->ship->getPosition(), degrees, axis);
 }
 
 void Player::panCamera(float degrees, glm::vec3 axis) {
 	if (this->currentCam == this->thirdPOV)
-		this->thirdPOV->rotateAround(degrees, axis);
+		this->thirdPOV->rotateAround(this->ship->getPosition(), degrees, axis);
 }
 
 void Player::toggleCamera() {
@@ -61,3 +69,6 @@ void Player::toggleCamera() {
 		this->currentCam = this->firstPOV;
 }
 
+glm::mat4 Player::getRotationMat() {
+	return this->ship->getRotation();
+}

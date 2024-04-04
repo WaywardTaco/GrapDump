@@ -2,8 +2,8 @@
 #include "OrthoCamera.hpp"
 
 OrthoCamera::OrthoCamera() :
-	Camera(glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f)),
-	left(-1.f), right(1.f), bottom(-1.f), top(1.f), zNear(-1.f), zFar(1.f) {}
+	Camera(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.1f, 100.f)),
+	left(-1.f), right(1.f), bottom(-1.f), top(1.f), zNear(0.1f), zFar(100.f) {}
 
 void OrthoCamera::setBounds(
 	float left,

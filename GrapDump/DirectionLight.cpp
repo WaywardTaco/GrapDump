@@ -8,8 +8,14 @@ DirectionLight::DirectionLight(glm::vec3 direction)
 	: LightSource(), direction(glm::normalize(direction)) {}
 
 void DirectionLight::apply(Shader* shader) {
-	LightSource::apply(shader);
+	shader->passVec3("dirLight.direction", this->direction);
 
+	shader->passVec3("dirLight.color", this->color);
+	shader->passFloat("dirLight.brightness", this->brightness);
+	shader->passFloat("dirLight.ambientStr", this->ambientStrength);
+	shader->passVec3("dirLight.ambientCol", this->ambientColor);
+	shader->passFloat("dirLight.specStr", this->specularStrength);
+	shader->passFloat("dirLight.specPhong", this->specularPhong);
 }
 
 void DirectionLight::setDirection(glm::vec3 direction) {

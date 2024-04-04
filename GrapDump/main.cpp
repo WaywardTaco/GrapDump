@@ -37,23 +37,15 @@
 #include "Player.hpp"
 
 float
-    mouseY = 0.f,
-    mouseX = 0.f,
-    modelMoveSpd = 0.05f,
-    lightRotSpd = 10.f,
-    brightnessStep = 10.f,
-    camPanSpeed = 0.5f;
+mousePrevY = 0.f,
+mousePrevX = 0.f;
 
-glm::vec3 lightColors[] = {
-    {1.f, 1.f, 1.f},
-    {1.f, 0.f, 0.f},
-    {1.f, 1.f, 0.f},
-    {0.f, 1.f, 0.f},
-    {0.f, 1.f, 1.f},
-    {0.f, 0.f, 1.f},
-    {1.f, 0.f, 1.f}
+float skyIntensities[] = {
+    2.f,
+    1.f,
+    0.2f
 };
-int lightColIndex = 0;
+int skyIntensity = 0;
 
 const float
     window_height = 1000,
@@ -61,20 +53,26 @@ const float
 const char* 
     window_name = "Josh";
 
+DirectionLight* skylight = NULL;
 OrthoCamera* orthoCam = NULL;
 Player* player = NULL;
 
-bool usingOrtho = false;
+bool 
+usingOrtho = false,
+lMousePressed = false;
 
 const float
-PLAYER_TURN_SPEED = 0.2f,
-PLAYER_MOVE_SPEED = 10.f,
-ORTHO_CAM_MOVE_SPEED = 10.f;
+PLAYER_TURN_SPEED = 1.f,
+PLAYER_MOVE_SPEED = 0.01f,
+ORTHO_CAM_MOVE_SPEED = 0.02f,
+ORTHO_CAM_PAN_SPEED = 1.f,
+THIRD_POV_CAM_PAN_SPEED = 1.f;
 
 /**********************************************************************/
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void cursorCallback(GLFWwindow* window, double xPos, double yPos);
+void cursorCallback(GLFWwindow* window, double xpos, double ypos);
+void mouse_callback(GLFWwindow* window, int button, int action, int mods);
 GLFWwindow* initializeGLFW();
 
 int main(void)
@@ -86,18 +84,14 @@ int main(void)
     Shader* mainShader = new Shader("Shader/sample.vert", "Shader/sample.frag");
     Shader* skyboxShader = new Shader("Shader/Skybox.vert", "Shader/Skybox.frag");
 
-    
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,   // Source Factor (Foreground Layer)
-        GL_ONE_MINUS_SRC_ALPHA); // Destination Factor (Background Layer)
-    // Final Color = ForegroundColor * SourceFactor + BackgroundColor * DestinationFactor
-    // glBlendEquation(GL_FUNC_SUBTRACT); changes addition to subtraction
     // See Website for Reference: Anders Riggelsen - Visual glBlendFunc and glBlendEquation Tool
-
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendEquation(GL_FUNC_ADD); 
 
     /* Object Declarations */
-    PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
-    OrthoCamera* orthoCam = new OrthoCamera();
+    orthoCam = new OrthoCamera();
+
     // TODO: Make Skybox an Ocean w/ Textures
     Skybox* sky = new Skybox(
         "Skybox/rainbow_rt.png",
@@ -106,44 +100,44 @@ int main(void)
         "Skybox/rainbow_dn.png",
         "Skybox/rainbow_ft.png",
         "Skybox/rainbow_bk.png");
-
-    std::vector<LightSource*> lights = {
-        new PointLight({ 0.f, 3.f, -5.f })
-    };
+    skylight = new DirectionLight();
+    skylight->setBrightness(skyIntensities[skyIntensity]);
 
     // TODO: Make 6 different textured models (no normal maps needed) and place randomly
     std::vector<Model*> models = {
         new Model("3D/djSword.obj", "3D/brickwall.jpg")
     };
-    Model* yae = new Model("3D/plane.obj", "3D/brickwall.jpg", "3D/brickwall_normal.jpg");
 
-    lights[0]->setBrightness(10.f);
-    
-    //yae->setScale(0.02f);
-    //yae->setPosition({ 0.f, -0.5f, 0.f });
-    //yae->rotate(90.f, { 0.f, 0.f, 1.f });
-    //yae->rotate(180.f, {0.f, 1.f, 0.f});
+    Model* ship = new Model("3D/djSword.obj", "3D/brickwall.jpg");
+    ship->setScale(0.02f);
 
-    models[0]->setPosition({0.f, 0.5f, 0.f});
+    player = new Player(
+        ship, 
+        new PointLight(), 
+        new PerspectiveCamera(),
+        new PerspectiveCamera());
+
+    models[0]->setPosition({0.f, 0.f, 0.f});
     models[0]->rotate(90.f, {0.f, 0.f, 1.f});
     models[0]->rotate(180.f, {0.f, 1.f, 0.f});
     models[0]->setScale(0.01f);
     
-    orthoCam->setPosition({0.f, 0.f, 1.f});
-    perspectiveCamera->setPosition({0.f, 0.f, -1.f});
-    perspectiveCamera->setCenter({0.f, 0.f, 0.f});
+    orthoCam->setPosition({0.f, 1.f, 0.f});
+    orthoCam->setWorldUp({0.f, 0.f, 1.f});
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        for (LightSource* light : lights)
-            light->apply(mainShader);
+        skylight->apply(mainShader);
 
-        perspectiveCamera->apply(mainShader, skyboxShader);
+        player->apply(mainShader, mainShader, skyboxShader);
+        if (usingOrtho)
+            orthoCam->apply(mainShader, skyboxShader);
 
         sky->render(skyboxShader);
         for (Model* model : models)
             model->render(mainShader);
+        player->render(mainShader, mainShader);
 
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
@@ -163,53 +157,43 @@ void keyCallback(
     int mods                // Which modifier keys are held (like Shift, Ctrl, Alt, etc.)
 )
 {
-    if (action == GLFW_RELEASE)
-        return;
 
-    if (key == GLFW_KEY_W && player != NULL)
+    if (key == GLFW_KEY_W && player != NULL && action != GLFW_RELEASE)
         player->move({ 0.f, 0.f, PLAYER_MOVE_SPEED });
-    if (key == GLFW_KEY_S && player != NULL)
+    if (key == GLFW_KEY_S && player != NULL && action != GLFW_RELEASE)
         player->move({ 0.f, 0.f, -PLAYER_MOVE_SPEED });
-    if (key == GLFW_KEY_A && player != NULL)
-        player->turn(-PLAYER_TURN_SPEED, { 0.f, 1.f, 0.f });
-    if (key == GLFW_KEY_D && player != NULL)
+    if (key == GLFW_KEY_A && player != NULL && action != GLFW_RELEASE)
         player->turn(PLAYER_TURN_SPEED, { 0.f, 1.f, 0.f });
-    if (key == GLFW_KEY_E && player != NULL)
+    if (key == GLFW_KEY_D && player != NULL && action != GLFW_RELEASE)
+        player->turn(-PLAYER_TURN_SPEED, { 0.f, 1.f, 0.f });
+    if (key == GLFW_KEY_E && player != NULL && action != GLFW_RELEASE)
         player->move({0.f, -PLAYER_MOVE_SPEED, 0.f});
-    if (key == GLFW_KEY_Q && player != NULL)
+    if (key == GLFW_KEY_Q && player != NULL && player->getPosition().y + PLAYER_MOVE_SPEED < 0.f && action != GLFW_RELEASE)
         player->move({0.f, PLAYER_MOVE_SPEED, 0.f});
-       
-    if (key == GLFW_KEY_SPACE && player != NULL)
+
+    if (key == GLFW_KEY_SPACE && player != NULL && action != GLFW_RELEASE) {
         // Shoot Torpedo which lasts 3 sec every 5 sec
 
-    if (key == GLFW_KEY_UP && orthoCam != NULL)
+    }
+
+    if (key == GLFW_KEY_UP && orthoCam != NULL && usingOrtho && action != GLFW_RELEASE)
         orthoCam->moveBy({ 0.f, 0.f, ORTHO_CAM_MOVE_SPEED });
-    if (key == GLFW_KEY_DOWN && orthoCam != NULL)
+    if (key == GLFW_KEY_DOWN && orthoCam != NULL && usingOrtho && action != GLFW_RELEASE)
         orthoCam->moveBy({ 0.f, 0.f, -ORTHO_CAM_MOVE_SPEED });
-    if (key == GLFW_KEY_RIGHT && orthoCam != NULL)
-        orthoCam->moveBy({ ORTHO_CAM_MOVE_SPEED, 0.f, 0.f });
-    if (key == GLFW_KEY_LEFT && orthoCam != NULL)
+    if (key == GLFW_KEY_RIGHT && orthoCam != NULL && usingOrtho && action != GLFW_RELEASE)
         orthoCam->moveBy({ -ORTHO_CAM_MOVE_SPEED, 0.f, 0.f });
+    if (key == GLFW_KEY_LEFT && orthoCam != NULL && usingOrtho && action != GLFW_RELEASE)
+        orthoCam->moveBy({ ORTHO_CAM_MOVE_SPEED, 0.f, 0.f });
 
-    if (key == GLFW_KEY_1 && player != NULL && !usingOrtho)
+    if (key == GLFW_KEY_1 && player != NULL && !usingOrtho && action != GLFW_RELEASE)
         player->toggleCamera();
-    if (key == GLFW_KEY_2)
+    if (key == GLFW_KEY_2 && action != GLFW_RELEASE)
         usingOrtho = !usingOrtho;
-}
 
-void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
-
-    if (ypos > mouseY)
-        //
-    if (ypos < mouseY)
-        //
-    if (xpos > mouseX)
-        //
-    if (xpos < mouseX)
-        //
-
-    mouseX = xpos;
-    mouseY = ypos;
+    if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
+        skyIntensity = (skyIntensity + 1) % 3;
+        skylight->setBrightness(skyIntensities[skyIntensity]);
+    }
 }
 
 GLFWwindow* initializeGLFW() {
@@ -231,11 +215,52 @@ GLFWwindow* initializeGLFW() {
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
     glfwSetCursorPosCallback(window, cursorCallback);
+    glfwSetMouseButtonCallback(window, mouse_callback);
     glfwSetKeyCallback(window, keyCallback);
 
     glEnable(GL_DEPTH_TEST);
     
     return window;
+}
+
+void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
+    if (!lMousePressed)
+        return;
+
+    if (!usingOrtho) {
+        if (xpos > mousePrevX)
+            player->panCamera(THIRD_POV_CAM_PAN_SPEED, {0.f, 1.f, 0.f});
+        if (xpos < mousePrevX)
+            player->panCamera(-THIRD_POV_CAM_PAN_SPEED, { 0.f, 1.f, 0.f });
+    }
+
+    if (usingOrtho) {
+        if (std::abs(xpos - mousePrevX) >= std::abs(ypos - mousePrevY)) {
+            if (xpos > mousePrevX)
+                orthoCam->rotateAround(orthoCam->getCenter(), ORTHO_CAM_PAN_SPEED, {0.f, 0.f, 1.f});
+            if (xpos < mousePrevX)
+                orthoCam->rotateAround(orthoCam->getCenter(), -ORTHO_CAM_PAN_SPEED, { 0.f, 0.f, 1.f });
+        }
+        else {
+            if (ypos > mousePrevY)
+                orthoCam->rotateAround(orthoCam->getCenter(), ORTHO_CAM_PAN_SPEED, { 1.f, 0.f, 0.f });
+            if (ypos < mousePrevY)
+                orthoCam->rotateAround(orthoCam->getCenter(), -ORTHO_CAM_PAN_SPEED, { 1.f, 0.f, 0.f });
+        }
+    }
+
+    mousePrevY = ypos;
+    mousePrevX = xpos;
+}
+
+void mouse_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS)
+            lMousePressed = true;
+        if (action == GLFW_RELEASE)
+            lMousePressed = false;
+    }
 }
 
 /*

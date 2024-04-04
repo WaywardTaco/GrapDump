@@ -11,7 +11,7 @@
 #include "Shader.hpp"
 
 class LightSource {
-private:
+protected:
 	glm::vec3
 		color,
 		ambientColor;
@@ -23,7 +23,7 @@ private:
 
 public:
 	LightSource();
-	virtual void apply(Shader* shader);
+	virtual void apply(Shader* shader) = 0;
 
 	void setColor(glm::vec3 color);
 	void setAmbientColor(glm::vec3 color);

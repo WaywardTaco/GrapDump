@@ -36,38 +36,14 @@ void Camera::moveTo(glm::vec3 move) {
     this->center += displacement;
 }
 
-void Camera::rotateAround(float degrees, glm::vec3 axis) {
-    glm::vec3 forwardVec = glm::normalize(glm::vec3(this->position - this->center));
-    glm::vec3 rightVec = glm::normalize(glm::cross(forwardVec, this->worldUp));
-
-    glm::vec3 upVec = glm::normalize(glm::cross(rightVec, forwardVec));
-
-    glm::mat4 cameraTransform = glm::mat4(1.f);
-
-    // [Col][Row]
-    cameraTransform[0][0] = rightVec.x;
-    cameraTransform[0][1] = rightVec.y;
-    cameraTransform[0][2] = rightVec.z;
-
-    cameraTransform[1][0] = upVec.x;
-    cameraTransform[1][1] = upVec.y;
-    cameraTransform[1][2] = upVec.z;
-
-    cameraTransform[2][0] = forwardVec.x;
-    cameraTransform[2][1] = forwardVec.y;
-    cameraTransform[2][2] = forwardVec.z;
-
-    glm::vec3 transformedAxis = glm::normalize(glm::vec3(cameraTransform * glm::vec4(glm::normalize(axis), 1.f)));
-
+void Camera::rotateAround(glm::vec3 center, float degrees, glm::vec3 axis) {
     glm::mat4 positionTransform = glm::mat4(1.f);
-    positionTransform = glm::rotate(positionTransform, glm::radians(degrees), transformedAxis);
-
-    this->position = glm::vec3(positionTransform * glm::vec4(this->position, 1.f));
-
-    this->worldUp = glm::vec3(positionTransform * glm::vec4(this->worldUp, 1.f));
+    positionTransform = glm::rotate(positionTransform, glm::radians(degrees), glm::normalize(axis));
+    this->position = center + glm::vec3(positionTransform * glm::vec4(this->position - center, 1.f));
+    this->center = center + glm::vec3(positionTransform * glm::vec4(this->center - center, 1.f));
 }
 
-void Camera::turn(float degrees, glm::vec3 axis) {
+void Camera::turn(float degrees, glm::vec3 axis) {  
     glm::vec3 forwardVec = glm::normalize(glm::vec3(this->center - this->position));
     glm::vec3 rightVec = glm::normalize(glm::cross(forwardVec, this->worldUp));
 
@@ -88,13 +64,12 @@ void Camera::turn(float degrees, glm::vec3 axis) {
     cameraTransform[2][1] = forwardVec.y;
     cameraTransform[2][2] = forwardVec.z;
 
-    glm::vec3 transformedAxis = glm::normalize(glm::vec3(cameraTransform * glm::vec4(glm::normalize(axis), 1.f)));
-
+    glm::vec4 centerTransformed = cameraTransform * glm::vec4(this->center, 1.0);
 
     glm::mat4 centerTransform = glm::mat4(1.f);
-    centerTransform = glm::rotate(centerTransform, glm::radians(degrees), transformedAxis);
+    centerTransform = glm::rotate(centerTransform, glm::radians(degrees), glm::normalize(axis));
 
-    this->center = glm::vec3(centerTransform * glm::vec4(this->center, 1.f));
+    this->center = glm::vec3(glm::inverse(cameraTransform) * centerTransform * centerTransformed);
 
     this->worldUp = glm::vec3(centerTransform * glm::vec4(this->worldUp, 1.f));
 }
@@ -110,3 +85,15 @@ void Camera::setCenter(glm::vec3 center) {
 void Camera::setProjection(glm::mat4 projection) {
     this->projection = projection;
 };
+
+void Camera::setWorldUp(glm::vec3 worldUp) {
+    this->worldUp = worldUp;
+}
+
+glm::mat4 Camera::getViewMat() {
+    return glm::lookAt(this->position, this->center, this->worldUp);
+}
+
+glm::vec3 Camera::getCenter() {
+    return this->center;
+}
