@@ -55,9 +55,11 @@ glm::vec3 lightColors[] = {
 };
 int lightColIndex = 0;
 
-float
+const float
     window_height = 1000,
     window_width = 1000;
+const char* 
+    window_name = "Josh";
 
 OrthoCamera* orthoCam = NULL;
 Player* player = NULL;
@@ -73,32 +75,18 @@ ORTHO_CAM_MOVE_SPEED = 10.f;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void cursorCallback(GLFWwindow* window, double xPos, double yPos);
+GLFWwindow* initializeGLFW();
 
 int main(void)
 {
-    /* Initialize the library */
-    if (!glfwInit())
+    GLFWwindow* window = initializeGLFW();
+    if (window == NULL)
         return -1;
 
-    /* Create a windowed mode window and its OpenGL context */
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Josiah Aviso", NULL, NULL);
+    Shader* mainShader = new Shader("Shader/sample.vert", "Shader/sample.frag");
+    Shader* skyboxShader = new Shader("Shader/Skybox.vert", "Shader/Skybox.frag");
 
-    if (!window) {
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-
-    /* Initializations */
-    gladLoadGL();
-    glfwSetKeyCallback(window, keyCallback);
-
-    if (glfwRawMouseMotionSupported())
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
-    glfwSetCursorPosCallback(window, cursorCallback);
-
+    
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,   // Source Factor (Foreground Layer)
         GL_ONE_MINUS_SRC_ALPHA); // Destination Factor (Background Layer)
@@ -106,28 +94,10 @@ int main(void)
     // glBlendEquation(GL_FUNC_SUBTRACT); changes addition to subtraction
     // See Website for Reference: Anders Riggelsen - Visual glBlendFunc and glBlendEquation Tool
 
-    /* Light declaration */
-    PointLight* pointLight = new PointLight({ 0.f, 3.f, -5.f });
-    pointLight->setBrightness(10.f);
 
+    /* Object Declarations */
     PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
     OrthoCamera* orthoCam = new OrthoCamera();
-    orthoCam->setPosition({0.f, 0.f, 1.f});
-    
-    // TODO: Make 6 different textured models (no normal maps needed) and place randomly
-    Model* mainModel = new Model("3D/djSword.obj", "3D/brickwall.jpg");
-    Model* yae = new Model("3D/djSword.obj", "3D/brickwall.jpg", "3D/brickwall_normal.jpg");
-
-    yae->setScale(0.02f);
-    yae->setPosition({ 0.f, -0.5f, 0.f });
-    yae->rotate(90.f, { 0.f, 0.f, 1.f });
-    yae->rotate(180.f, {0.f, 1.f, 0.f});
-
-    mainModel->setScale(10.f);
-    mainModel->setPosition({ 0.f, 0.5f, 0.f });
-    mainModel->rotate(90.f, { 0.f, 0.f, 1.f });
-    mainModel->rotate(180.f, { 0.f, 1.f, 0.f });
-
     // TODO: Make Skybox an Ocean w/ Textures
     Skybox* sky = new Skybox(
         "Skybox/rainbow_rt.png",
@@ -137,37 +107,47 @@ int main(void)
         "Skybox/rainbow_ft.png",
         "Skybox/rainbow_bk.png");
 
-    // Front-back texture fixing
-    glEnable(GL_DEPTH_TEST); 
+    std::vector<LightSource*> lights = {
+        new PointLight({ 0.f, 3.f, -5.f })
+    };
 
-    Shader* mainShader = new Shader("Shader/sample.vert", "Shader/sample.frag");
-    Shader* skyboxShader = new Shader("Shader/Skybox.vert", "Shader/Skybox.frag");
+    // TODO: Make 6 different textured models (no normal maps needed) and place randomly
+    std::vector<Model*> models = {
+        new Model("3D/djSword.obj", "3D/brickwall.jpg")
+    };
+    Model* yae = new Model("3D/plane.obj", "3D/brickwall.jpg", "3D/brickwall_normal.jpg");
+
+    lights[0]->setBrightness(10.f);
     
+    //yae->setScale(0.02f);
+    //yae->setPosition({ 0.f, -0.5f, 0.f });
+    //yae->rotate(90.f, { 0.f, 0.f, 1.f });
+    //yae->rotate(180.f, {0.f, 1.f, 0.f});
+
+    models[0]->setPosition({0.f, 0.5f, 0.f});
+    models[0]->rotate(90.f, {0.f, 0.f, 1.f});
+    models[0]->rotate(180.f, {0.f, 1.f, 0.f});
+    models[0]->setScale(0.01f);
+    
+    orthoCam->setPosition({0.f, 0.f, 1.f});
     perspectiveCamera->setPosition({0.f, 0.f, -1.f});
     perspectiveCamera->setCenter({0.f, 0.f, 0.f});
-    mainModel->setScale(0.01f);
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        for (LightSource* light : lights)
+            light->apply(mainShader);
 
         perspectiveCamera->apply(mainShader, skyboxShader);
 
-        /* Lighting */
-        pointLight->apply(mainShader);
-        
         sky->render(skyboxShader);
-        mainModel->render(mainShader);
-        yae->render(mainShader);
-
-        mainModel->rotate(-0.05f, { 0.f, 1.f, 0.f });
-        yae->rotate(-0.05f, {0.f, 1.f, 0.f});
-
+        for (Model* model : models)
+            model->render(mainShader);
 
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
         glfwPollEvents();
-        //processInput(perspectiveCamera, mainModel, lightModel, pointLight, directionLight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
@@ -230,6 +210,32 @@ void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
 
     mouseX = xpos;
     mouseY = ypos;
+}
+
+GLFWwindow* initializeGLFW() {
+    if (!glfwInit())
+        return NULL;
+
+    GLFWwindow* window = glfwCreateWindow(window_width, window_height, window_name, NULL, NULL);
+
+    if (!window) {
+        glfwTerminate();
+        return NULL;
+    }
+
+    glfwMakeContextCurrent(window);
+
+    gladLoadGL();
+
+    if (glfwRawMouseMotionSupported())
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+    glfwSetCursorPosCallback(window, cursorCallback);
+    glfwSetKeyCallback(window, keyCallback);
+
+    glEnable(GL_DEPTH_TEST);
+    
+    return window;
 }
 
 /*
