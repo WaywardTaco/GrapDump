@@ -1,11 +1,15 @@
 #pragma once
 
+#include <iostream>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "Shader.hpp"
 
 class Camera {
 protected:
@@ -20,7 +24,7 @@ public:
 	Camera(glm::mat4 projection);
 
 public:
-	void apply(GLuint shaderProgram);
+	void apply(Shader* object_shader, Shader* skybox_shader);
 
 	void moveBy(glm::vec3 move);
 	void moveTo(glm::vec3 move);
@@ -30,9 +34,4 @@ public:
 	void setPosition(glm::vec3 position);
 	void setCenter(glm::vec3 center);
 	void setProjection(glm::mat4 projection);
-
-	glm::mat4 getViewMat();
-	glm::mat4 getProjection();
-	glm::vec3 getPosition();
-
 };

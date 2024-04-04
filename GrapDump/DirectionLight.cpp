@@ -7,8 +7,8 @@ DirectionLight::DirectionLight()
 DirectionLight::DirectionLight(glm::vec3 direction)
 	: LightSource(), direction(glm::normalize(direction)) {}
 
-void DirectionLight::apply(GLuint shaderProgram) {
-	LightSource::apply(shaderProgram);
+void DirectionLight::apply(Shader* shader) {
+	LightSource::apply(shader);
 
 }
 

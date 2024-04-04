@@ -367,36 +367,21 @@ Model::~Model() {
     glDeleteBuffers(1, &this->VBO);
 }
 
-void Model::render(GLuint shaderProgram) {
-    glUseProgram(shaderProgram); 
+void Model::render(Shader* shader) {
+    shader->use();
     
     glm::mat4 transform(1.f);
     transform = glm::translate(transform, this->position);
     transform = glm::scale(transform, this->modelScale);
     transform = transform * this->rotation;
 
-    unsigned int transformAdrs = glGetUniformLocation(shaderProgram, "transform");
-    glUniformMatrix4fv(transformAdrs, 1, GL_FALSE, glm::value_ptr(transform));
-
-    unsigned int baseColorAdrs = glGetUniformLocation(shaderProgram, "modelBaseColor");
-    glUniform3fv(baseColorAdrs, 1, glm::value_ptr( this->modelBaseColor));
-
-    unsigned int hasTexAdrs = glGetUniformLocation(shaderProgram, "modelHasTexture");
-    glUniform1i(hasTexAdrs, this->hasTexture);
-
-    unsigned int hasNormalsAdrs = glGetUniformLocation(shaderProgram, "modelHasNormMap");
-    glUniform1i(hasNormalsAdrs, this->hasNormMap);
-
-    /* Texture stuff */
-    glActiveTexture(GL_TEXTURE0);
-    GLuint tex0Adrs = glGetUniformLocation(shaderProgram, "tex0");
-    glBindTexture(GL_TEXTURE_2D, this->texture);
-    glUniform1i(tex0Adrs, 0); // 0 is the index of the texture
-
-    glActiveTexture(GL_TEXTURE1);
-    GLuint tex1Adrs = glGetUniformLocation(shaderProgram, "norm_tex");
-    glBindTexture(GL_TEXTURE_2D, this->normalMap);
-    glUniform1i(tex1Adrs, 1); // 1 is the index of the normals
+    shader->passMat4("transform", transform);
+    shader->passVec3("modelBaseColor", this->modelBaseColor);
+    shader->passBool("modelHasTexture", this->hasTexture);
+    shader->passBool("modelHasNormMap", this->hasNormMap);
+    
+    shader->pass2DTexture("tex0", this->texture, 0);
+    shader->pass2DTexture("norm_tex", this->normalMap, 1);
 
     /* Render VAO w/ shader */
     glDepthMask(GL_TRUE);
@@ -427,6 +412,10 @@ void Model::scale(glm::vec3 scale) {
     this->modelScale.y += scale.y;
     this->modelScale.z += scale.z;
 };
+
+glm::vec3 Model::getPosition() {
+    return this->position;
+}
 
 void Model::setPosition(glm::vec3 position) {
     this->position = position;

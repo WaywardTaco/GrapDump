@@ -11,7 +11,7 @@ public:
 	DirectionLight();
 	DirectionLight(glm::vec3 direction);
 
-	void apply(GLuint shaderProgram);
+	void apply(Shader* shader);
 	void setDirection(glm::vec3 direction);
 	void rotate(float degrees, glm::vec3 axis);
 };

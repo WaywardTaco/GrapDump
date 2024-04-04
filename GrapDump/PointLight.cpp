@@ -7,11 +7,9 @@ PointLight::PointLight()
 PointLight::PointLight(glm::vec3 position)
 	: LightSource(), position(position) {}
 
-void PointLight::apply(GLuint shaderProgram) {
-	LightSource::apply(shaderProgram);
-
-	GLuint lightAdrs = glGetUniformLocation(shaderProgram, "lightPos");
-	glUniform3fv(lightAdrs, 1, glm::value_ptr(this->position));
+void PointLight::apply(Shader* shader) {
+	LightSource::apply(shader);
+    shader->passVec3("lightPos", this->position);
 }
 
 void PointLight::rotateAround(glm::vec3 center, float degrees, glm::vec3 axis) {

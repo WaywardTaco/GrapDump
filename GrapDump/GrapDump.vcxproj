@@ -147,7 +147,9 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OrthoCamera.cpp" />
     <ClCompile Include="PerspectiveCamera.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,7 +159,9 @@
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="OrthoCamera.hpp" />
     <ClInclude Include="PerspectiveCamera.hpp" />
+    <ClInclude Include="Player.hpp" />
     <ClInclude Include="PointLight.hpp" />
+    <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Skybox.hpp" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="tiny_obj_loader.h" />

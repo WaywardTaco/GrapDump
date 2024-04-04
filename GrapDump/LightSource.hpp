@@ -8,6 +8,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Shader.hpp"
+
 class LightSource {
 private:
 	glm::vec3
@@ -21,7 +23,7 @@ private:
 
 public:
 	LightSource();
-	virtual void apply(GLuint shaderProgram);
+	virtual void apply(Shader* shader);
 
 	void setColor(glm::vec3 color);
 	void setAmbientColor(glm::vec3 color);

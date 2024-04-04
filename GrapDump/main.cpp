@@ -25,6 +25,7 @@
 #include "tiny_obj_loader.h"
 #endif
 
+#include "Shader.hpp"
 #include "Model.hpp"
 #include "Camera.hpp"
 #include "PerspectiveCamera.hpp"
@@ -33,6 +34,7 @@
 #include "LightSource.hpp"
 #include "PointLight.hpp"
 #include "DirectionLight.hpp"
+#include "Player.hpp"
 
 float
     mouseY = 0.f,
@@ -57,33 +59,20 @@ float
     window_height = 1000,
     window_width = 1000;
 
-bool 
-    controllingLight = false,
-    wPressed = false,
-    aPressed = false,
-    sPressed = false,
-    dPressed = false,
-    qPressed = false,
-    ePressed = false,
-    upPressed = false,
-    downPressed = false,
-    leftPressed = false,
-    rightPressed = false,
-    onePressed = false,
-    twoPressed = false,
-    spacePressed = false,
-    mouseUp = false,
-    mouseDown = false,
-    mouseLeft = false,
-    mouseRight = false;
+OrthoCamera* orthoCam = NULL;
+Player* player = NULL;
+
+bool usingOrtho = false;
+
+const float
+PLAYER_TURN_SPEED = 0.2f,
+PLAYER_MOVE_SPEED = 10.f,
+ORTHO_CAM_MOVE_SPEED = 10.f;
 
 /**********************************************************************/
 
-GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void cursorCallback(GLFWwindow* window, double xPos, double yPos);
-void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight);
-void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv);
 
 int main(void)
 {
@@ -122,7 +111,10 @@ int main(void)
     pointLight->setBrightness(10.f);
 
     PerspectiveCamera* perspectiveCamera = new PerspectiveCamera();
+    OrthoCamera* orthoCam = new OrthoCamera();
+    orthoCam->setPosition({0.f, 0.f, 1.f});
     
+    // TODO: Make 6 different textured models (no normal maps needed) and place randomly
     Model* mainModel = new Model("3D/djSword.obj", "3D/brickwall.jpg");
     Model* yae = new Model("3D/djSword.obj", "3D/brickwall.jpg", "3D/brickwall_normal.jpg");
 
@@ -136,7 +128,7 @@ int main(void)
     mainModel->rotate(90.f, { 0.f, 0.f, 1.f });
     mainModel->rotate(180.f, { 0.f, 1.f, 0.f });
 
-
+    // TODO: Make Skybox an Ocean w/ Textures
     Skybox* sky = new Skybox(
         "Skybox/rainbow_rt.png",
         "Skybox/rainbow_lf.png",
@@ -148,23 +140,25 @@ int main(void)
     // Front-back texture fixing
     glEnable(GL_DEPTH_TEST); 
 
-    GLuint shaderProg = compShaderProg("Shader/sample.vert", "Shader/sample.frag");
-    GLuint skyboxShader = compShaderProg("Shader/Skybox.vert", "Shader/Skybox.frag");
-
+    Shader* mainShader = new Shader("Shader/sample.vert", "Shader/sample.frag");
+    Shader* skyboxShader = new Shader("Shader/Skybox.vert", "Shader/Skybox.frag");
     
     perspectiveCamera->setPosition({0.f, 0.f, -1.f});
+    perspectiveCamera->setCenter({0.f, 0.f, 0.f});
     mainModel->setScale(0.01f);
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+
+        perspectiveCamera->apply(mainShader, skyboxShader);
+
         /* Lighting */
-        pointLight->apply(shaderProg);
+        pointLight->apply(mainShader);
         
-        sky->render(skyboxShader, (Camera*)perspectiveCamera);
-        perspectiveCamera->apply(shaderProg);
-        mainModel->render(shaderProg);
-        yae->render(shaderProg);
+        sky->render(skyboxShader);
+        mainModel->render(mainShader);
+        yae->render(mainShader);
 
         mainModel->rotate(-0.05f, { 0.f, 1.f, 0.f });
         yae->rotate(-0.05f, {0.f, 1.f, 0.f});
@@ -181,46 +175,6 @@ int main(void)
     return 0;
 }
 
-GLuint compShaderProg(std::string vertShaderSrc, std::string fragShaderSrc) {
-    /* Read the Shaders from their source files */
-    std::fstream        
-        vertFile(vertShaderSrc),
-        fragFile(fragShaderSrc);
-    std::stringstream   
-        vertBuff,
-        fragBuff;
-                        
-        vertBuff << vertFile.rdbuf();
-        fragBuff << fragFile.rdbuf();
-    std::string         
-        vertStr = vertBuff.str(),
-        fragStr = fragBuff.str();
-    const char          
-        *v = vertStr.c_str(),
-        *f = fragStr.c_str();
-    GLuint
-        vertexShader = glCreateShader(GL_VERTEX_SHADER),
-        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER),
-        shaderProg = glCreateProgram();
-
-    /* Compile Shaders */
-    glShaderSource(vertexShader, 1, &v, NULL);
-    glShaderSource(fragmentShader, 1, &f, NULL);
-    glCompileShader(vertexShader);
-    glCompileShader(fragmentShader);
-
-    /* Link Vertex and Fragment Shaders for use */
-    glAttachShader(shaderProg, vertexShader);
-    glAttachShader(shaderProg, fragmentShader); 
-    glLinkProgram(shaderProg);
-
-    /* Cleanup */
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return shaderProg;
-};
-
 void keyCallback(
     GLFWwindow* window,     // Pointer to the window being checked
     int key,                // the keycode being pressed
@@ -232,53 +186,53 @@ void keyCallback(
     if (action == GLFW_RELEASE)
         return;
 
-    if (key == GLFW_KEY_W)
-        wPressed = true;
-    if (key == GLFW_KEY_S)
-        sPressed = true;
-    if (key == GLFW_KEY_A)
-        aPressed = true;
-    if (key == GLFW_KEY_D)
-        dPressed = true;
-    if (key == GLFW_KEY_E)
-        ePressed = true;
-    if (key == GLFW_KEY_Q)
-        qPressed = true;
+    if (key == GLFW_KEY_W && player != NULL)
+        player->move({ 0.f, 0.f, PLAYER_MOVE_SPEED });
+    if (key == GLFW_KEY_S && player != NULL)
+        player->move({ 0.f, 0.f, -PLAYER_MOVE_SPEED });
+    if (key == GLFW_KEY_A && player != NULL)
+        player->turn(-PLAYER_TURN_SPEED, { 0.f, 1.f, 0.f });
+    if (key == GLFW_KEY_D && player != NULL)
+        player->turn(PLAYER_TURN_SPEED, { 0.f, 1.f, 0.f });
+    if (key == GLFW_KEY_E && player != NULL)
+        player->move({0.f, -PLAYER_MOVE_SPEED, 0.f});
+    if (key == GLFW_KEY_Q && player != NULL)
+        player->move({0.f, PLAYER_MOVE_SPEED, 0.f});
        
-    if (key == GLFW_KEY_SPACE) 
-        spacePressed = true;
+    if (key == GLFW_KEY_SPACE && player != NULL)
+        // Shoot Torpedo which lasts 3 sec every 5 sec
 
-    if (key == GLFW_KEY_UP)
-        upPressed = true;
-    if (key == GLFW_KEY_DOWN)
-        downPressed = true;
-    if (key == GLFW_KEY_RIGHT)
-        rightPressed = true;
-    if (key == GLFW_KEY_LEFT)
-        leftPressed = true;
+    if (key == GLFW_KEY_UP && orthoCam != NULL)
+        orthoCam->moveBy({ 0.f, 0.f, ORTHO_CAM_MOVE_SPEED });
+    if (key == GLFW_KEY_DOWN && orthoCam != NULL)
+        orthoCam->moveBy({ 0.f, 0.f, -ORTHO_CAM_MOVE_SPEED });
+    if (key == GLFW_KEY_RIGHT && orthoCam != NULL)
+        orthoCam->moveBy({ ORTHO_CAM_MOVE_SPEED, 0.f, 0.f });
+    if (key == GLFW_KEY_LEFT && orthoCam != NULL)
+        orthoCam->moveBy({ -ORTHO_CAM_MOVE_SPEED, 0.f, 0.f });
 
-    if (key == GLFW_KEY_1)
-        onePressed = true;
+    if (key == GLFW_KEY_1 && player != NULL && !usingOrtho)
+        player->toggleCamera();
     if (key == GLFW_KEY_2)
-        twoPressed = true;
+        usingOrtho = !usingOrtho;
 }
 
 void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
 
     if (ypos > mouseY)
-        mouseUp = true;
+        //
     if (ypos < mouseY)
-        mouseDown = true;
+        //
     if (xpos > mouseX)
-        mouseRight = true;
+        //
     if (xpos < mouseX)
-        mouseLeft = true;
+        //
 
     mouseX = xpos;
     mouseY = ypos;
 }
 
-
+/*
 void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* pointLight, DirectionLight* dirLight) {
     if (wPressed) {
         if (controllingLight) {
@@ -386,11 +340,7 @@ void processInput(Camera* cam, Model* mainModel, Model* light, PointLight* point
         mouseLeft = false;
     }
 }
-
-void setShaderMat4fv(GLuint shaderProg, const GLchar* variable, glm::mat4 matrix4fv) {
-    unsigned int varLoc = glGetUniformLocation(shaderProg, variable);
-    glUniformMatrix4fv(varLoc, 1, GL_FALSE, glm::value_ptr(matrix4fv));
-}
+*/
 
 /* Older Notes */
 /*

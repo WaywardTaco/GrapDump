@@ -132,19 +132,10 @@ Skybox::Skybox(
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void Skybox::render(GLuint shaderProgram, Camera* camera) {
-    glUseProgram(shaderProgram);
+void Skybox::render(Shader* shader) {
+    shader->use();
     glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
-
-    glm::mat4 skyMatrix = glm::mat4(1.f);
-    skyMatrix = glm::mat4(glm::mat3(camera->getViewMat()));
-
-    unsigned int viewAdrs = glGetUniformLocation(shaderProgram, "view");
-    glUniformMatrix4fv(viewAdrs, 1, GL_FALSE, glm::value_ptr(skyMatrix));
-
-    unsigned int projectionAdrs = glGetUniformLocation(shaderProgram, "projection");
-    glUniformMatrix4fv(projectionAdrs, 1, GL_FALSE, glm::value_ptr(camera->getProjection()));
 
     glBindVertexArray(this->VAO);
     glActiveTexture(GL_TEXTURE0);

@@ -11,7 +11,7 @@ public:
 	PointLight();
 	PointLight(glm::vec3 position);
 
-	void apply(GLuint shaderProgram);
+	void apply(Shader* shader);
 
 	void rotateAround(glm::vec3 center, float degrees, glm::vec3 axis);
 

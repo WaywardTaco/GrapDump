@@ -15,6 +15,7 @@
 #endif
 
 #include "Camera.hpp"
+#include "Shader.hpp"
 
 class Skybox {
 private:
@@ -30,5 +31,5 @@ public:
 		std::string frontTex,
 		std::string backTex);
 
-	void render(GLuint shaderProgram, Camera* camera);
+	void render(Shader* shader);
 };

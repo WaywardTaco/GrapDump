@@ -9,6 +9,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Shader.hpp"
+
 #ifndef INCLUDE_TINYOBJ
 #define INCLUDE_TINYOBJ
 #include "tiny_obj_loader.h"
@@ -47,12 +49,14 @@ public:
     ~Model();
 
 public:
-    void render(GLuint shaderProgram);
+    void render(Shader* shader);
 
     void move(glm::vec3 position);
     void rotate(float degrees, glm::vec3 axis);
     void scale(float scale);
     void scale(glm::vec3 scale);
+
+    glm::vec3 getPosition();
 
     void setPosition(glm::vec3 position);
     void rotateAround(glm::vec3 center, float degrees, glm::vec3 axis);
