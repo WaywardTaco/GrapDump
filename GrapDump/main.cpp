@@ -53,6 +53,8 @@ const float
 const char* 
     window_name = "Josh";
 
+GLFWgamepadstate lastState;
+
 DirectionLight* skylight = NULL;
 OrthoCamera* orthoCam = NULL;
 Player* player = NULL;
@@ -66,10 +68,25 @@ PLAYER_TURN_SPEED = 1.f,
 PLAYER_MOVE_SPEED = 0.01f,
 ORTHO_CAM_MOVE_SPEED = 0.02f,
 ORTHO_CAM_PAN_SPEED = 1.f,
-THIRD_POV_CAM_PAN_SPEED = 1.f;
+THIRD_POV_CAM_PAN_SPEED = 1.f,
+GAMEPAD_INPUT_MOD = 0.2f;
 
 /**********************************************************************/
 
+/*****************************************************************
+*   Controller Bindings
+*       Ascend/Descend - A/B Buttons / X/Circle Buttons
+*       Forward/Backward - Up/Down Dpad
+*       Turn Left/Right - Left/Right Dpad
+*       Switch between first-person & third-person - Left Bumper / L1
+*       Rotate third-person camera - Right Stick (Left/Right)
+*       Switch to/from orthographic camera - Right Bumper / R1
+*       Move orthographic camera - Left Stick while in ortho
+*       Rotate orthographic camera - Right Stick while in ortho
+*       Cycle through skylight brightness - Y Button / Triangle Button
+******************************************************************/
+
+void processGamepad();
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void cursorCallback(GLFWwindow* window, double xpos, double ypos);
 void mouse_callback(GLFWwindow* window, int button, int action, int mods);
@@ -83,6 +100,8 @@ int main(void)
 
     Shader* mainShader = new Shader("Shader/sample.vert", "Shader/sample.frag");
     Shader* skyboxShader = new Shader("Shader/Skybox.vert", "Shader/Skybox.frag");
+    Shader* monochromeShader = new Shader("Shader/sample.vert", "Shader/monochrome.frag");
+    Shader* monoSkyShader = new Shader("Shader/Skybox.vert", "Shader/monochromeSky.frag");
 
     // See Website for Reference: Anders Riggelsen - Visual glBlendFunc and glBlendEquation Tool
     glEnable(GL_BLEND);
@@ -129,24 +148,74 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         skylight->apply(mainShader);
+        skylight->apply(monochromeShader);
 
-        player->apply(mainShader, mainShader, skyboxShader);
+        player->apply(mainShader, monochromeShader, skyboxShader, monoSkyShader);
         if (usingOrtho)
             orthoCam->apply(mainShader, skyboxShader);
 
-        sky->render(skyboxShader);
-        for (Model* model : models)
-            model->render(mainShader);
-        player->render(mainShader, mainShader);
+        if (player->isUsingFirstPOV())
+            sky->render(monoSkyShader);
+        else
+            sky->render(skyboxShader);
+
+
+        for (Model* model : models) {
+            if (player->isUsingFirstPOV())
+                model->render(monochromeShader);
+            else
+                model->render(mainShader);
+        }
+        player->render(mainShader, monochromeShader);
+
+        //std::cout << "Depth: " << player->getPosition().y << std::endl;
 
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
         glfwPollEvents();
+        processGamepad();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     glfwTerminate();
     return 0;
+}
+
+void processGamepad() {
+    GLFWgamepadstate gamepad;
+    glfwGetGamepadState(GLFW_JOYSTICK_1, &gamepad);
+
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP])
+        player->move({ 0.f, 0.f, PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD });
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
+        player->move({ 0.f, 0.f, -PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD });
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT])
+        player->turn(PLAYER_TURN_SPEED * GAMEPAD_INPUT_MOD, { 0.f, 1.f, 0.f });
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT])
+        player->turn(-PLAYER_TURN_SPEED * GAMEPAD_INPUT_MOD, { 0.f, 1.f, 0.f });
+
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_A] && player->getPosition().y + PLAYER_MOVE_SPEED < 0.f)
+        player->move({ 0.f, PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD, 0.f });
+    if(gamepad.buttons[GLFW_GAMEPAD_BUTTON_B])
+        player->move({ 0.f, -PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD, 0.f });
+
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] && !usingOrtho && !lastState.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER])
+        player->toggleCamera();
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER] && !lastState.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER])
+        usingOrtho = !usingOrtho;
+
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_Y] && !lastState.buttons[GLFW_GAMEPAD_BUTTON_Y]) {
+        skyIntensity = (skyIntensity + 1) % 3;
+        skylight->setBrightness(skyIntensities[skyIntensity]);
+    }
+
+    lastState = gamepad;
+        /*****************************************************************
+*   Controller Bindings
+*       Rotate third-person camera - Right Stick (Left/Right)
+*       Move orthographic camera - Left Stick while in ortho
+*       Rotate orthographic camera - Right Stick while in ortho
+******************************************************************/
 }
 
 void keyCallback(
@@ -157,7 +226,6 @@ void keyCallback(
     int mods                // Which modifier keys are held (like Shift, Ctrl, Alt, etc.)
 )
 {
-
     if (key == GLFW_KEY_W && player != NULL && action != GLFW_RELEASE)
         player->move({ 0.f, 0.f, PLAYER_MOVE_SPEED });
     if (key == GLFW_KEY_S && player != NULL && action != GLFW_RELEASE)
