@@ -52,7 +52,7 @@ const float
     window_height = 1000,
     window_width = 1000;
 const char* 
-    window_name = "Josh";
+    window_name = "Aviso & Baniqued";
 
 GLFWgamepadstate lastState;
 
@@ -130,10 +130,15 @@ int main(void)
 
     // TODO: Make 6 different textured models (no normal maps needed) and place randomly
     std::vector<Model*> models = {
-        new Model("3D/Fish.obj", "3D/partenza.jpg")
+        new Model("3D/goose.obj", "3D/goose.jpg"),
+        new Model("3D/dolphin.obj", "3D/dolphin.jpg"),
+        new Model("3D/frog.obj", "3D/frog.jpg"),
+        new Model("3D/bluefish.obj", "3D/bluefish.jpg"),
+        new Model("3D/angler.obj", "3D/angler.jpg"),
+        new Model("3D/alligator.obj", "3D/alligator.jpg")
     };
 
-    Model* ship = new Model("3D/Fish.obj", "3D/fish.jpg");
+    Model* ship = new Model("3D/fish.obj", "3D/fish.jpg");
     ship->setScale(0.02f);
 
     player = new Player(
@@ -142,10 +147,25 @@ int main(void)
         new PerspectiveCamera(),
         new PerspectiveCamera());
 
-    models[0]->setPosition({0.f, 0.f, 0.3f});
-    models[0]->rotate(90.f, {0.f, 0.f, 1.f});
-    models[0]->rotate(180.f, {0.f, 1.f, 0.f});
-    models[0]->setScale(0.01f);
+    models[0]->setPosition({0.6f, 0.0f, 2.8f});
+    models[0]->setScale(0.5f);
+
+    models[1]->setPosition({ 1.5f, 0.0f, 0.0f });
+    models[1]->setScale(0.1f);
+
+    models[2]->rotate(180.0f, { 0.f, 1.f, 0.f });
+    models[2]->setPosition({ -2.0f, 0.0f, 0.7f });
+    models[2]->setScale(0.02f);
+
+    models[3]->setPosition({ 0.0f, 0.5f, -1.5f });
+    models[3]->setScale(0.001f);
+
+    models[4]->setPosition({ 1.25f, 1.0f, 1.70f });
+    models[4]->setScale(0.01f);
+
+    models[5]->rotate(270.0f, { 1.f, 0.f, 0.f });
+    models[5]->setPosition({ -1.0f, -1.50f, 0.0f });
+    models[5]->setScale(0.001f);
     
     orthoCam->setPosition({0.f, 1.f, 0.f});
     orthoCam->setWorldUp({0.f, 0.f, 1.f});
@@ -176,7 +196,7 @@ int main(void)
 
         player->render(activeModelShader);
 
-        //std::cout << "Depth: " << player->getPosition().y << std::endl;
+        std::cout << "Depth: " << player->getPosition().y << std::endl;
 
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
