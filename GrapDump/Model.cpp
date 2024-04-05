@@ -368,6 +368,7 @@ Model::~Model() {
 }
 
 void Model::render(Shader* shader) {
+
     shader->use();
     
     glm::mat4 transform(1.f);
@@ -384,6 +385,7 @@ void Model::render(Shader* shader) {
     shader->pass2DTexture("norm_tex", this->normalMap, 1);
 
     /* Render VAO w/ shader */
+    shader->use();
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
     glBindVertexArray(this->VAO);

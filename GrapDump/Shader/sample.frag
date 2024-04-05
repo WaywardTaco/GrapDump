@@ -33,9 +33,17 @@ struct PointLight {
 	float specStr;
 };
 
+struct SpotLight {
+	PointLight base;
+	vec3 direction;
+	float innerCutoff;
+	float outerCutoff;
+};
+
 // Function Predefs
 vec3 calcDirLighting(DirLight light, vec3 pointNorm, vec3 viewDir);
 vec3 calcPointLighting(PointLight light, vec3 pointNorm, vec3 fragPos, vec3 viewDir);
+vec3 calcSpotLighting(SpotLight light, vec3 pointNorm, vec3 fragPos, vec3 viewDir);
 
 // Uniforms
 uniform vec3 cameraPos;
@@ -49,6 +57,7 @@ uniform bool modelHasNormMap;
 
 uniform DirLight dirLight;
 uniform PointLight pointLight;
+uniform SpotLight spotLight;
 
 out vec4 FragColor; 
 
@@ -74,7 +83,8 @@ void main() {
 
 	vec3 lighting = vec3(0.0);
 	lighting = lighting + calcDirLighting(dirLight, pointNorm, viewDir);
-	lighting = lighting + calcPointLighting(pointLight, pointNorm, fragPos, viewDir);
+	//lighting = lighting + calcPointLighting(pointLight, pointNorm, fragPos, viewDir);
+	lighting = lighting + calcSpotLighting(spotLight, pointNorm, fragPos, viewDir);
 
 	FragColor = vec4(lighting, 1.0) * texture(tex0, texCoord);
 }
@@ -122,6 +132,19 @@ vec3 calcPointLighting(PointLight light, vec3 pointNorm, vec3 fragPos, vec3 view
 
 	vec3 lighting = vec3(0.0);
 	lighting += (diffuse + ambient + specular);
+
+	return lighting;
+}
+
+vec3 calcSpotLighting(SpotLight light, vec3 pointNorm, vec3 fragPos, vec3 viewDir){
+
+	float theta = dot(normalize(light.base.position - fragPos), normalize(-light.direction));
+	float epsilon = light.innerCutoff - light.outerCutoff;
+	float intensity = clamp((theta - light.outerCutoff) / epsilon,0.0, 1.0);
+
+	vec3 lighting = vec3(0.0);
+	lighting += calcPointLighting(light.base, pointNorm, fragPos, viewDir);
+	lighting *= intensity;
 
 	return lighting;
 }

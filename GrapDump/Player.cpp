@@ -1,12 +1,12 @@
 
 #include "Player.hpp"
 
-Player::Player(Model* ship, PointLight* spotlight, PerspectiveCamera* firstPOV, PerspectiveCamera* thirdPOV) :
+Player::Player(Model* ship, SpotLight* spotlight, PerspectiveCamera* firstPOV, PerspectiveCamera* thirdPOV) :
 	ship(ship), spotlight(spotlight), firstPOV(firstPOV), thirdPOV(thirdPOV), currentCam(thirdPOV) 
 {
 	/* Player Setup */
 	glm::vec3 shipCenter = { 0.f, 0.f, 0.f };
-	glm::vec3 shipNose = { 0.f, 0.f, 1.f };
+	glm::vec3 shipNose = { 0.f, 0.f, 0.5f };
 	glm::vec3 thirdPOVOffset = { -0.5f, 0.5f, -1.f };
 
 	this->ship->setPosition(shipCenter);
@@ -24,25 +24,12 @@ Player::Player(Model* ship, PointLight* spotlight, PerspectiveCamera* firstPOV, 
 	this->thirdPOV->setZfar(100.f);
 }
 
-void Player::apply(Shader* normal_shader, Shader* monochrome_shader, Shader* skybox_shader, Shader* mono_sky_shader) {
-	Shader* model_shader = normal_shader;
-	Shader* sky_shader = skybox_shader;
-
-	if (this->currentCam == this->firstPOV) {
-		model_shader = monochrome_shader;
-		sky_shader = mono_sky_shader;
-	}
-	
+void Player::apply(Shader* model_shader, Shader* sky_shader) {
 	this->currentCam->apply(model_shader, sky_shader);
 	this->spotlight->apply(model_shader);
 }
 
-void Player::render(Shader* normal_shader, Shader* monochrome_shader) {
-	Shader* model_shader = normal_shader;
-
-	if (this->currentCam == this->firstPOV)
-		model_shader = monochrome_shader;
-
+void Player::render(Shader* model_shader) {
 	this->ship->render(model_shader);
 }
 
@@ -59,9 +46,10 @@ void Player::move(glm::vec3 movement) {
 
 void Player::turn(float degrees, glm::vec3 axis) {
 	this->ship->rotate(degrees, axis);
-	this->spotlight->rotateAround(this->ship->getPosition(), degrees, axis);
 	this->firstPOV->rotateAround(this->ship->getPosition(), degrees, axis);
 	this->thirdPOV->rotateAround(this->ship->getPosition(), degrees, axis);
+	this->spotlight->rotateAround(this->ship->getPosition(), degrees, axis);
+	this->spotlight->setDirection(this->spotlight->getPosition() - this->ship->getPosition());
 }
 
 void Player::panCamera(float degrees, glm::vec3 axis) {

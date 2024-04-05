@@ -34,6 +34,7 @@
 #include "LightSource.hpp"
 #include "PointLight.hpp"
 #include "DirectionLight.hpp"
+#include "SpotLight.hpp"
 #include "Player.hpp"
 
 float
@@ -73,8 +74,8 @@ GAMEPAD_INPUT_MOD = 0.2f;
 
 /**********************************************************************/
 
-/*****************************************************************
-*   Controller Bindings
+/**********************************************************************
+*   Controller Bindings:
 *       Ascend/Descend - A/B Buttons / X/Circle Buttons
 *       Forward/Backward - Up/Down Dpad
 *       Turn Left/Right - Left/Right Dpad
@@ -84,7 +85,7 @@ GAMEPAD_INPUT_MOD = 0.2f;
 *       Move orthographic camera - Left Stick while in ortho
 *       Rotate orthographic camera - Right Stick while in ortho
 *       Cycle through skylight brightness - Y Button / Triangle Button
-******************************************************************/
+***********************************************************************/
 
 void processGamepad();
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -132,7 +133,7 @@ int main(void)
 
     player = new Player(
         ship, 
-        new PointLight(), 
+        new SpotLight(), 
         new PerspectiveCamera(),
         new PerspectiveCamera());
 
@@ -150,9 +151,11 @@ int main(void)
         skylight->apply(mainShader);
         skylight->apply(monochromeShader);
 
-        player->apply(mainShader, monochromeShader, skyboxShader, monoSkyShader);
-        if (usingOrtho)
+        player->apply(mainShader, skyboxShader);
+
+        if (usingOrtho) {
             orthoCam->apply(mainShader, skyboxShader);
+        }
 
         if (player->isUsingFirstPOV())
             sky->render(monoSkyShader);
@@ -166,7 +169,7 @@ int main(void)
             else
                 model->render(mainShader);
         }
-        player->render(mainShader, monochromeShader);
+        player->render(mainShader);
 
         //std::cout << "Depth: " << player->getPosition().y << std::endl;
 

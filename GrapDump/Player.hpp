@@ -2,13 +2,13 @@
 #pragma once
 
 #include "Model.hpp"
-#include "PointLight.hpp"
+#include "SpotLight.hpp"
 #include "PerspectiveCamera.hpp"
 
 class Player {
 private:
 	Model* ship;
-	PointLight* spotlight;
+	SpotLight* spotlight;
 	PerspectiveCamera 
 		*firstPOV,
 		*thirdPOV,
@@ -16,9 +16,9 @@ private:
 	bool usingFirstPOV;
 
 public:
-	Player(Model* ship, PointLight* spotlight, PerspectiveCamera* firstPOV, PerspectiveCamera* thirdPOV);
-	void apply(Shader* normal_shader, Shader* monochrome_shader, Shader* skybox_shader, Shader* mono_sky_shader);
-	void render(Shader* normal_shader, Shader* monochrome_shader);
+	Player(Model* ship, SpotLight* spotlight, PerspectiveCamera* firstPOV, PerspectiveCamera* thirdPOV);
+	void apply(Shader* model_shader, Shader* sky_shader);
+	void render(Shader* model_shader);
 	glm::vec3 getPosition();
 	void move(glm::vec3 movement);
 	void turn(float degrees, glm::vec3 axis);

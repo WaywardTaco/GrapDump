@@ -28,6 +28,10 @@ void PointLight::setPosition(glm::vec3 position) {
 	this->position = position;
 }
 
+glm::vec3 PointLight::getPosition() {
+    return this->position;
+}
+
 void PointLight::move(glm::vec3 move) {
 	this->position += move;
 }
