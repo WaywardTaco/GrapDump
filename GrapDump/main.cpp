@@ -147,20 +147,20 @@ int main(void)
         new PerspectiveCamera(),
         new PerspectiveCamera());
 
-    models[0]->setPosition({0.6f, 0.0f, 2.8f});
+    models[0]->setPosition({0.6f, -0.2f, 2.8f});
     models[0]->setScale(0.5f);
 
-    models[1]->setPosition({ 1.5f, 0.0f, 0.0f });
+    models[1]->setPosition({ 1.5f, -0.5f, 0.0f });
     models[1]->setScale(0.1f);
 
     models[2]->rotate(180.0f, { 0.f, 1.f, 0.f });
-    models[2]->setPosition({ -2.0f, 0.0f, 0.7f });
+    models[2]->setPosition({ -2.0f, -0.2f, 0.7f });
     models[2]->setScale(0.02f);
 
-    models[3]->setPosition({ 0.0f, 0.5f, -1.5f });
+    models[3]->setPosition({ 0.0f, -0.75f, -1.5f });
     models[3]->setScale(0.001f);
 
-    models[4]->setPosition({ 1.25f, 1.0f, 1.70f });
+    models[4]->setPosition({ 1.25f, -1.0f, 1.70f });
     models[4]->setScale(0.01f);
 
     models[5]->rotate(270.0f, { 1.f, 0.f, 0.f });
