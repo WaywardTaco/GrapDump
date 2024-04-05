@@ -11,6 +11,8 @@ private:
 public:
 	PerspectiveCamera();
 
+	void apply(Shader* object_shader, Shader* skybox_shader);
+
 	void setFOV(float FOV);
 	void setAspectRatio(float heightByWidth);
 	void setZnear(float zNear);

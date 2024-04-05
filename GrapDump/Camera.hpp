@@ -24,7 +24,7 @@ public:
 	Camera(glm::mat4 projection);
 
 public:
-	void apply(Shader* object_shader, Shader* skybox_shader);
+	virtual void apply(Shader* object_shader, Shader* skybox_shader);
 
 	void moveBy(glm::vec3 move);
 	void moveTo(glm::vec3 move);

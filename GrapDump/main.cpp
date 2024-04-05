@@ -70,7 +70,8 @@ PLAYER_MOVE_SPEED = 0.01f,
 ORTHO_CAM_MOVE_SPEED = 0.02f,
 ORTHO_CAM_PAN_SPEED = 1.f,
 THIRD_POV_CAM_PAN_SPEED = 1.f,
-GAMEPAD_INPUT_MOD = 0.2f;
+GAMEPAD_INPUT_MOD = 0.08f,
+GAMEPAD_JOYSTICK_THRESHOLD = 0.2f;
 
 /**********************************************************************/
 
@@ -104,6 +105,9 @@ int main(void)
     Shader* monochromeShader = new Shader("Shader/sample.vert", "Shader/monochrome.frag");
     Shader* monoSkyShader = new Shader("Shader/Skybox.vert", "Shader/monochromeSky.frag");
 
+    Shader* activeModelShader = NULL;
+    Shader* activeSkyShader = NULL;
+
     // See Website for Reference: Anders Riggelsen - Visual glBlendFunc and glBlendEquation Tool
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -112,23 +116,24 @@ int main(void)
     /* Object Declarations */
     orthoCam = new OrthoCamera();
 
-    // TODO: Make Skybox an Ocean w/ Textures
+    // Source: https://jkhub.org/files/file/3216-underwater-skybox/
     Skybox* sky = new Skybox(
-        "Skybox/rainbow_rt.png",
-        "Skybox/rainbow_lf.png",
-        "Skybox/rainbow_up.png",
-        "Skybox/rainbow_dn.png",
-        "Skybox/rainbow_ft.png",
-        "Skybox/rainbow_bk.png");
+        "Skybox/uw_rt.png",
+        "Skybox/uw_lf.png",
+        "Skybox/uw_up.png",
+        "Skybox/uw_dn.png",
+        "Skybox/uw_ft.png",
+        "Skybox/uw_bk.png");
+
     skylight = new DirectionLight();
     skylight->setBrightness(skyIntensities[skyIntensity]);
 
     // TODO: Make 6 different textured models (no normal maps needed) and place randomly
     std::vector<Model*> models = {
-        new Model("3D/djSword.obj", "3D/brickwall.jpg")
+        new Model("3D/Fish.obj", "3D/partenza.jpg")
     };
 
-    Model* ship = new Model("3D/djSword.obj", "3D/brickwall.jpg");
+    Model* ship = new Model("3D/Fish.obj", "3D/fish.jpg");
     ship->setScale(0.02f);
 
     player = new Player(
@@ -137,39 +142,39 @@ int main(void)
         new PerspectiveCamera(),
         new PerspectiveCamera());
 
-    models[0]->setPosition({0.f, 0.f, 0.f});
+    models[0]->setPosition({0.f, 0.f, 0.3f});
     models[0]->rotate(90.f, {0.f, 0.f, 1.f});
     models[0]->rotate(180.f, {0.f, 1.f, 0.f});
     models[0]->setScale(0.01f);
     
     orthoCam->setPosition({0.f, 1.f, 0.f});
     orthoCam->setWorldUp({0.f, 0.f, 1.f});
+    orthoCam->setZnear(0.01f);
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        skylight->apply(mainShader);
-        skylight->apply(monochromeShader);
+        activeModelShader = mainShader;
+        activeSkyShader = skyboxShader;
 
-        player->apply(mainShader, skyboxShader);
+        if (player->isUsingFirstPOV() && !usingOrtho) {
+            activeModelShader = monochromeShader;
+            activeSkyShader = monoSkyShader;
+        }
+
+        skylight->apply(activeModelShader);
+        player->apply(activeModelShader, activeSkyShader);
 
         if (usingOrtho) {
-            orthoCam->apply(mainShader, skyboxShader);
+            orthoCam->apply(activeModelShader, activeSkyShader);
         }
 
-        if (player->isUsingFirstPOV())
-            sky->render(monoSkyShader);
-        else
-            sky->render(skyboxShader);
+        sky->render(activeSkyShader);
 
+        for (Model* model : models)
+            model->render(activeModelShader);
 
-        for (Model* model : models) {
-            if (player->isUsingFirstPOV())
-                model->render(monochromeShader);
-            else
-                model->render(mainShader);
-        }
-        player->render(mainShader);
+        player->render(activeModelShader);
 
         //std::cout << "Depth: " << player->getPosition().y << std::endl;
 
@@ -189,22 +194,22 @@ void processGamepad() {
     glfwGetGamepadState(GLFW_JOYSTICK_1, &gamepad);
 
     if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP])
-        player->move({ 0.f, 0.f, PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD });
+        player->move({ -PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD , 0.f, 0.f });
     if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
-        player->move({ 0.f, 0.f, -PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD });
+        player->move({ PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD, 0.f, 0.f });
     if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT])
         player->turn(PLAYER_TURN_SPEED * GAMEPAD_INPUT_MOD, { 0.f, 1.f, 0.f });
     if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT])
         player->turn(-PLAYER_TURN_SPEED * GAMEPAD_INPUT_MOD, { 0.f, 1.f, 0.f });
 
     if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_A] && player->getPosition().y + PLAYER_MOVE_SPEED < 0.f)
-        player->move({ 0.f, PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD, 0.f });
+        player->move({ 0.f, 0.f, PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD });
     if(gamepad.buttons[GLFW_GAMEPAD_BUTTON_B])
-        player->move({ 0.f, -PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD, 0.f });
+        player->move({ 0.f, 0.f, -PLAYER_MOVE_SPEED * GAMEPAD_INPUT_MOD });
 
-    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] && !usingOrtho && !lastState.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER])
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] && !usingOrtho && !lastState.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER])
         player->toggleCamera();
-    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER] && !lastState.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER])
+    if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER] && !lastState.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER])
         usingOrtho = !usingOrtho;
 
     if (gamepad.buttons[GLFW_GAMEPAD_BUTTON_Y] && !lastState.buttons[GLFW_GAMEPAD_BUTTON_Y]) {
@@ -212,11 +217,44 @@ void processGamepad() {
         skylight->setBrightness(skyIntensities[skyIntensity]);
     }
 
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_X] > GAMEPAD_JOYSTICK_THRESHOLD && usingOrtho) {
+        orthoCam->moveBy({ -ORTHO_CAM_MOVE_SPEED * GAMEPAD_INPUT_MOD, 0.f, 0.f });
+    }
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_X] < -GAMEPAD_JOYSTICK_THRESHOLD && usingOrtho) {
+        orthoCam->moveBy({ ORTHO_CAM_MOVE_SPEED * GAMEPAD_INPUT_MOD, 0.f, 0.f });
+    }
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > GAMEPAD_JOYSTICK_THRESHOLD && usingOrtho) {
+        orthoCam->moveBy({ 0.f, 0.f, -ORTHO_CAM_MOVE_SPEED * GAMEPAD_INPUT_MOD });
+    }
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] < -GAMEPAD_JOYSTICK_THRESHOLD && usingOrtho) {
+        orthoCam->moveBy({ 0.f, 0.f, ORTHO_CAM_MOVE_SPEED * GAMEPAD_INPUT_MOD });
+    }
+
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] > GAMEPAD_JOYSTICK_THRESHOLD && usingOrtho) {
+        orthoCam->rotateAround(orthoCam->getCenter(), ORTHO_CAM_PAN_SPEED * GAMEPAD_INPUT_MOD, { 0.f, 0.f, 1.f });
+    }
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] < -GAMEPAD_JOYSTICK_THRESHOLD && usingOrtho) {
+        orthoCam->rotateAround(orthoCam->getCenter(), -ORTHO_CAM_PAN_SPEED * GAMEPAD_INPUT_MOD, { 0.f, 0.f, 1.f });
+    }
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] > GAMEPAD_JOYSTICK_THRESHOLD && usingOrtho) {
+        orthoCam->rotateAround(orthoCam->getCenter(), -ORTHO_CAM_PAN_SPEED * GAMEPAD_INPUT_MOD, { 1.f, 0.f, 0.f });
+    }
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] < -GAMEPAD_JOYSTICK_THRESHOLD && usingOrtho) {
+        orthoCam->rotateAround(orthoCam->getCenter(), ORTHO_CAM_PAN_SPEED * GAMEPAD_INPUT_MOD, { 1.f, 0.f, 0.f });
+    }
+
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] > GAMEPAD_JOYSTICK_THRESHOLD && !usingOrtho) {
+        player->panCamera(THIRD_POV_CAM_PAN_SPEED * GAMEPAD_INPUT_MOD, { 0.f, 1.f, 0.f });
+    }
+    if (gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] < -GAMEPAD_JOYSTICK_THRESHOLD && !usingOrtho) {
+        player->panCamera(-THIRD_POV_CAM_PAN_SPEED * GAMEPAD_INPUT_MOD, { 0.f, 1.f, 0.f });
+    }
+
     lastState = gamepad;
+
         /*****************************************************************
 *   Controller Bindings
 *       Rotate third-person camera - Right Stick (Left/Right)
-*       Move orthographic camera - Left Stick while in ortho
 *       Rotate orthographic camera - Right Stick while in ortho
 ******************************************************************/
 }
@@ -230,17 +268,17 @@ void keyCallback(
 )
 {
     if (key == GLFW_KEY_W && player != NULL && action != GLFW_RELEASE)
-        player->move({ 0.f, 0.f, PLAYER_MOVE_SPEED });
+        player->move({ -PLAYER_MOVE_SPEED, 0.f, 0.f });
     if (key == GLFW_KEY_S && player != NULL && action != GLFW_RELEASE)
-        player->move({ 0.f, 0.f, -PLAYER_MOVE_SPEED });
+        player->move({ PLAYER_MOVE_SPEED, 0.f, 0.f });
     if (key == GLFW_KEY_A && player != NULL && action != GLFW_RELEASE)
         player->turn(PLAYER_TURN_SPEED, { 0.f, 1.f, 0.f });
     if (key == GLFW_KEY_D && player != NULL && action != GLFW_RELEASE)
         player->turn(-PLAYER_TURN_SPEED, { 0.f, 1.f, 0.f });
     if (key == GLFW_KEY_E && player != NULL && action != GLFW_RELEASE)
-        player->move({0.f, -PLAYER_MOVE_SPEED, 0.f});
+        player->move({0.f, 0.f, -PLAYER_MOVE_SPEED});
     if (key == GLFW_KEY_Q && player != NULL && player->getPosition().y + PLAYER_MOVE_SPEED < 0.f && action != GLFW_RELEASE)
-        player->move({0.f, PLAYER_MOVE_SPEED, 0.f});
+        player->move({0.f, 0.f, PLAYER_MOVE_SPEED});
 
     if (key == GLFW_KEY_SPACE && player != NULL && action != GLFW_RELEASE) {
         // Shoot Torpedo which lasts 3 sec every 5 sec
@@ -299,9 +337,9 @@ void cursorCallback(GLFWwindow* window, double xpos, double ypos) {
         return;
 
     if (!usingOrtho) {
-        if (xpos > mousePrevX)
-            player->panCamera(THIRD_POV_CAM_PAN_SPEED, {0.f, 1.f, 0.f});
         if (xpos < mousePrevX)
+            player->panCamera(THIRD_POV_CAM_PAN_SPEED, {0.f, 1.f, 0.f});
+        if (xpos > mousePrevX)
             player->panCamera(-THIRD_POV_CAM_PAN_SPEED, { 0.f, 1.f, 0.f });
     }
 

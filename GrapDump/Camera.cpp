@@ -20,8 +20,6 @@ void Camera::apply(Shader* object_shader, Shader* skybox_shader) {
     skyMatrix = glm::mat4(glm::mat3(viewMat));
 
     skybox_shader->passMat4("view", skyMatrix);
-
-    skybox_shader->passMat4("projection", this->projection);
 };
 
 void Camera::moveBy(glm::vec3 move) {

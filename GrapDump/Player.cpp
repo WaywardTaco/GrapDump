@@ -6,14 +6,16 @@ Player::Player(Model* ship, SpotLight* spotlight, PerspectiveCamera* firstPOV, P
 {
 	/* Player Setup */
 	glm::vec3 shipCenter = { 0.f, 0.f, 0.f };
-	glm::vec3 shipNose = { 0.f, 0.f, 0.5f };
+	glm::vec3 shipNose = { 0.f, 0.f, 0.3f };
 	glm::vec3 thirdPOVOffset = { -0.5f, 0.5f, -1.f };
 
 	this->ship->setPosition(shipCenter);
-	this->ship->setRotation(0.f, {0.f, 0.f, 1.f});
+	this->ship->setRotation(-90.f, {1.f, 0.f, 0.f});
+	this->ship->rotate(90.f, {0.f, 1.f, 0.f});
 
 	this->spotlight->setPosition(shipNose);
 	this->spotlight->setBrightness(0.3);
+	this->spotlight->setCutoffs(10.f, 20.f);
 	
 	this->firstPOV->setPosition(shipNose);
 	this->firstPOV->setCenter(shipNose + glm::vec3(0.f, 0.f, 1.f));
