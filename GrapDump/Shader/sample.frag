@@ -83,7 +83,6 @@ void main() {
 
 	vec3 lighting = vec3(0.0);
 	lighting = lighting + calcDirLighting(dirLight, pointNorm, viewDir);
-	//lighting = lighting + calcPointLighting(pointLight, pointNorm, fragPos, viewDir);
 	lighting = lighting + calcSpotLighting(spotLight, pointNorm, fragPos, viewDir);
 
 	FragColor = vec4(lighting, 1.0) * texture(tex0, texCoord);
