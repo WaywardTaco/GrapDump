@@ -15,6 +15,9 @@ void Camera::apply(Shader* object_shader, Shader* skybox_shader) {
     object_shader->passMat4("projection", this->projection);
     object_shader->passVec3("cameraPos", this->position);
 
+    if (skybox_shader == NULL)
+        return;
+
     skybox_shader->use();
     glm::mat4 skyMatrix = glm::mat4(1.f);
     skyMatrix = glm::mat4(glm::mat3(viewMat));

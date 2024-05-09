@@ -7,7 +7,8 @@ PerspectiveCamera::PerspectiveCamera() :
 
 void PerspectiveCamera::apply(Shader* object_shader, Shader* skybox_shader) {
 	Camera::apply(object_shader, skybox_shader);
-	skybox_shader->passMat4("projection", this->projection);
+	if(skybox_shader != NULL)
+		skybox_shader->passMat4("projection", this->projection);
 }
 
 void PerspectiveCamera::setFOV(float FOV) {

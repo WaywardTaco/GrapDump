@@ -103,7 +103,5 @@
   <ItemGroup>
     <None Include="Shader\Skybox.vert" />
     <None Include="Shader\Skybox.frag" />
-    <None Include="Shader\monochrome.frag" />
-    <None Include="Shader\monochromeSky.frag" />
   </ItemGroup>
 </Project>

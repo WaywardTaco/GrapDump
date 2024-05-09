@@ -193,8 +193,6 @@
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\monochromeSky.frag" />
-    <None Include="Shader\monochrome.frag" />
     <None Include="Shader\Skybox.frag" />
     <None Include="Shader\Skybox.vert" />
   </ItemGroup>
