@@ -30,6 +30,7 @@
 #include "Camera.hpp"
 //#include "PerspectiveCamera.hpp"
 #include "OrthoCamera.hpp"
+#include "Physics/Vector3.hpp"
 //#include "Skybox.hpp"
 //#include "LightSource.hpp"
 //#include "PointLight.hpp"
@@ -44,6 +45,8 @@ const char*
     window_name = "Josiah Kurt B. Aviso";
 
 GLFWwindow* initializeGLFW();
+
+using namespace Physics;
 
 int main(void)
 {
@@ -61,7 +64,9 @@ int main(void)
 
     /* Object Declarations */
     OrthoCamera* orthoCam = new OrthoCamera();
-    orthoCam->setPosition(glm::vec3(0.f, 0.f, -1.f));
+    orthoCam->setPosition(glm::vec3(0.f, 0.f, 1.f));
+
+    Physics::Vector3 pos = Physics::Vector3(-1.f, 0.f, 0.f);
 
     Model* sphere = new Model("3D/sphere.obj", glm::vec3(0.5f, 0.f, 0.f));
     sphere->setScale(0.3);
@@ -71,7 +76,10 @@ int main(void)
     {
         orthoCam->apply(mainShader, NULL);
         
+        sphere->setPosition((glm::vec3) pos);
         sphere->render(mainShader);
+
+        pos += Physics::Vector3(0.001, 0.f, 0.f);
 
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
