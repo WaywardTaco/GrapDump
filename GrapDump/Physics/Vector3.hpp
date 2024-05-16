@@ -11,10 +11,10 @@
 namespace Physics {
     class Vector3 {
         public:
-            float x, y, z;
+            double x, y, z;
 
         public:
-            Vector3(float x, float y, float z);
+            Vector3(double x, double y, double z);
             
             // CONVERSION
             explicit operator std::string() const;
@@ -31,22 +31,22 @@ namespace Physics {
             Vector3 operator * (const Vector3 vec);
 
             // SCALAR/DOT PRODUCT
-            float dot(Vector3 vec);
-            float scalarProduct(Vector3 vec);
+            double dot(Vector3 vec);
+            double scalarProduct(Vector3 vec);
 
             // VECTOR/CROSS PRODUCT
             Vector3 cross(Vector3 vec);
             Vector3 vectorProduct(Vector3 vec);
 
             // SCALAR MULT & DIV
-            void operator *= (const float scalar);
-            void operator /= (const float scalar);
-            Vector3 operator * (const float scalar);
-            Vector3 operator / (const float scalar);
+            void operator *= (const double scalar);
+            void operator /= (const double scalar);
+            Vector3 operator * (const double scalar);
+            Vector3 operator / (const double scalar);
 
             // MAGNITUDE
-            float magnitudeSqrd();
-            float magnitude();
+            double magnitudeSqrd();
+            double magnitude();
 
             // DIRECTION
             Vector3 normalize();

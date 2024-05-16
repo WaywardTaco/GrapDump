@@ -3,7 +3,7 @@
 
 using namespace Physics;
 
-Vector3::Vector3(float x, float y, float z) : 
+Vector3::Vector3(double x, double y, double z) : 
     x(x), y(y), z(z){}
 
 Vector3::operator std::string() const{
@@ -66,14 +66,14 @@ Vector3 Vector3::operator * (const Vector3 vec){
     );
 }
 
-float Vector3::dot(Vector3 vec) {
+double Vector3::dot(Vector3 vec) {
     return 
         this->x * vec.x +
         this->y * vec.y +
         this->z * vec.z;
 }
 
-float Vector3::scalarProduct(Vector3 vec){
+double Vector3::scalarProduct(Vector3 vec){
     return this->dot(vec);
 }
 
@@ -89,19 +89,19 @@ Vector3 Vector3::vectorProduct(Vector3 vec){
     return this->cross(vec);
 }
 
-void Vector3::operator *= (const float scalar){
+void Vector3::operator *= (const double scalar){
     this->x *= scalar;
     this->y *= scalar;
     this->z *= scalar;
 }
 
-void Vector3::operator /= (const float scalar){
+void Vector3::operator /= (const double scalar){
     this->x /= scalar;
     this->y /= scalar;
     this->z /= scalar;
 }
 
-Vector3 Vector3::operator * (const float scalar){
+Vector3 Vector3::operator * (const double scalar){
     return Vector3(
         this->x * scalar,
         this->y * scalar,
@@ -109,7 +109,7 @@ Vector3 Vector3::operator * (const float scalar){
     );
 }
 
-Vector3 Vector3::operator / (const float scalar){
+Vector3 Vector3::operator / (const double scalar){
     return Vector3(
         this->x / scalar,
         this->y / scalar,
@@ -117,7 +117,7 @@ Vector3 Vector3::operator / (const float scalar){
     );
 }
 
-float Vector3::magnitudeSqrd() {
+double Vector3::magnitudeSqrd() {
     return (
         this->x * this->x +
         this->y * this->y +
@@ -125,7 +125,7 @@ float Vector3::magnitudeSqrd() {
         );
 }
 
-float Vector3::magnitude() {
+double Vector3::magnitude() {
     return std::sqrt(this->magnitudeSqrd());
 }
 
