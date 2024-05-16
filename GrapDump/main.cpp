@@ -44,7 +44,7 @@ const float
     window_height = 1000,
     window_width = 1000;
 const char* 
-    window_name = "Josiah Kurt B. Aviso";
+    window_name = "Josiah Kurt B. Aviso & Dun Gerald C. Baniqued";
 
 GLFWwindow* initializeGLFW();
 
@@ -59,6 +59,7 @@ int main(void){
     auto curr_time = clock::now();
     auto prev_time = curr_time;
     std::chrono::nanoseconds curr_ns(0);
+    std::chrono::nanoseconds TotalTime(0);
 
     GLFWwindow* window = initializeGLFW();
     if (window == NULL)
@@ -80,12 +81,13 @@ int main(void){
     Physics::Vector3 pos = Physics::Vector3(-1.f, 0.f, 0.f);
 
     Model* sphere = new Model("3D/sphere.obj", glm::vec3(0.5f, 0.f, 0.f));
-    sphere->setScale(10.f);
+    sphere->setScale(20.f);
 
     Particle particle = Particle();
     particle.position = Vector3(0.f, -500.f, 0.f);
     particle.velocity = Vector3(0.f, 300.f, 0.f);
     particle.acceleration = Vector3(0.f, -50.f, 0.f);
+    bool isHitGround = false;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -95,12 +97,23 @@ int main(void){
         prev_time = curr_time;
         
         curr_ns += dur;
+        TotalTime += dur;
 
         if(curr_ns >= timestep){
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
-            curr_ns -= timestep;
+            curr_ns -= curr_ns;
 
             particle.Update((double)(ms.count() / 1000.f));
+        }
+
+        if (particle.position.y < -500 && !isHitGround) {
+            isHitGround = true;
+
+            auto hit = std::chrono::duration_cast<std::chrono::milliseconds>(TotalTime);
+            std::cout << "Time taken: " << (float)hit.count() << "ms" << std::endl;
+
+            particle.velocity = Vector3(0.f, 0.f, 0.f);
+            particle.acceleration = Vector3(0.f, 0.f, 0.f);
         }
 
         orthoCam->apply(mainShader, NULL);
