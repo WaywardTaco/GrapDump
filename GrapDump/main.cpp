@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <chrono>
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #include "stb_image.h"
@@ -31,6 +32,7 @@
 //#include "PerspectiveCamera.hpp"
 #include "OrthoCamera.hpp"
 #include "Physics/Vector3.hpp"
+#include "Physics/Particle.hpp"
 //#include "Skybox.hpp"
 //#include "LightSource.hpp"
 //#include "PointLight.hpp"
@@ -46,10 +48,18 @@ const char*
 
 GLFWwindow* initializeGLFW();
 
+using namespace std::chrono_literals;
 using namespace Physics;
 
-int main(void)
-{
+// 16ms as 60 fps translates to 16ms per frame
+constexpr std::chrono::nanoseconds timestep(16ms);
+
+int main(void){
+    using clock = std::chrono::high_resolution_clock;
+    auto curr_time = clock::now();
+    auto prev_time = curr_time;
+    std::chrono::nanoseconds curr_ns(0);
+
     GLFWwindow* window = initializeGLFW();
     if (window == NULL)
         return -1;
@@ -58,28 +68,47 @@ int main(void)
     //Shader* skyboxShader = new Shader("Shader/Skybox.vert", "Shader/Skybox.frag");
 
     // See Website for Reference: Anders Riggelsen - Visual glBlendFunc and glBlendEquation Tool
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendEquation(GL_FUNC_ADD); 
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glBlendEquation(GL_FUNC_ADD); 
 
     /* Object Declarations */
     OrthoCamera* orthoCam = new OrthoCamera();
     orthoCam->setPosition(glm::vec3(0.f, 0.f, 1.f));
+    orthoCam->setProjection(glm::ortho( - 500.f, 500.f, -500.f, 500.f, 0.1f, 100.f));
 
     Physics::Vector3 pos = Physics::Vector3(-1.f, 0.f, 0.f);
 
     Model* sphere = new Model("3D/sphere.obj", glm::vec3(0.5f, 0.f, 0.f));
-    sphere->setScale(0.3);
+    sphere->setScale(10.f);
+
+    Particle particle = Particle();
+    particle.position = Vector3(0.f, -500.f, 0.f);
+    particle.velocity = Vector3(0.f, 300.f, 0.f);
+    particle.acceleration = Vector3(0.f, -50.f, 0.f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        curr_time = clock::now();
+        auto dur = std::chrono::duration_cast<std::chrono::nanoseconds> (curr_time - prev_time) ;
+        prev_time = curr_time;
+        
+        curr_ns += dur;
+
+        if(curr_ns >= timestep){
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
+            curr_ns -= timestep;
+
+            particle.Update((double)(ms.count() / 1000.f));
+        }
+
         orthoCam->apply(mainShader, NULL);
         
-        sphere->setPosition((glm::vec3) pos);
+        sphere->setPosition((glm::vec3) particle.position);
         sphere->render(mainShader);
 
-        pos += Physics::Vector3(0.001, 0.f, 0.f);
+        //pos += Physics::Vector3(0.001, 0.f, 0.f);
 
         /* Render Frame and Wait for inputs, then resets window & depth buffer */
         glfwSwapBuffers(window);
@@ -95,15 +124,14 @@ GLFWwindow* initializeGLFW() {
     if (!glfwInit())
         return NULL;
 
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, window_name, NULL, NULL);
+    GLFWwindow* window 
+        = glfwCreateWindow(window_width, window_height, window_name, NULL, NULL);
 
     if (!window) {
         glfwTerminate();
-        return NULL;
-    }
+        return NULL;}
 
     glfwMakeContextCurrent(window);
-
     gladLoadGL();
 
     /*

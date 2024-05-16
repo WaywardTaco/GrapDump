@@ -147,6 +147,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OrthoCamera.cpp" />
     <ClCompile Include="PerspectiveCamera.cpp" />
+    <ClCompile Include="Physics\Particle.cpp" />
     <ClCompile Include="Physics\Vector3.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PointLight.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="OrthoCamera.hpp" />
     <ClInclude Include="PerspectiveCamera.hpp" />
+    <ClInclude Include="Physics\Particle.hpp" />
     <ClInclude Include="Physics\Vector3.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="PointLight.hpp" />

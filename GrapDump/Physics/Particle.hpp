@@ -18,7 +18,7 @@ namespace Physics {
             Vector3 acceleration;
 
         public:
-            Particle(double mass);
+            Particle(double mass = 0.f);
 
         protected:
             void UpdatePosition(double deltaTime);
