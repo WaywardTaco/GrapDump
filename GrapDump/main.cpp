@@ -55,7 +55,6 @@ using namespace Physics;
 constexpr std::chrono::nanoseconds timestep(16ms);
 
 int main(void){
-    std::chrono::nanoseconds TotalTime(0);
 
     GLFWwindow* window = initializeGLFW();
     if (window == NULL)
@@ -77,7 +76,7 @@ int main(void){
     Physics::Vector3 pos = Physics::Vector3(-1.f, 0.f, 0.f);
 
     Model* sphere = new Model("3D/sphere.obj", glm::vec3(0.5f, 0.f, 0.f));
-    sphere->setScale(10.f);
+    sphere->setScale(20.f);
 
     float x, y, z;
     std::cout << "Velocity:" << std::endl;
@@ -92,8 +91,8 @@ int main(void){
     std::chrono::nanoseconds TotalTime(0);
 
     Particle particle = Particle();
+    particle.position = Vector3(0.f, -500.f, 0.f);
     particle.velocity = Vector3(x, y ,z);
-    particle.velocity = Vector3(0.f, 300.f, 0.f);
     particle.acceleration = Vector3(0.f, -50.f, 0.f);
     bool isHitGround = false;
 
@@ -105,6 +104,7 @@ int main(void){
         prev_time = curr_time;
 
         curr_ns += dur;
+        TotalTime += dur;
 
         if(curr_ns >= timestep){
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
