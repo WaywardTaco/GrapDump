@@ -55,11 +55,6 @@ using namespace Physics;
 constexpr std::chrono::nanoseconds timestep(16ms);
 
 int main(void){
-    using clock = std::chrono::high_resolution_clock;
-    auto curr_time = clock::now();
-    auto prev_time = curr_time;
-    std::chrono::nanoseconds curr_ns(0);
-    std::chrono::nanoseconds TotalTime(0);
 
     GLFWwindow* window = initializeGLFW();
     if (window == NULL)
@@ -83,9 +78,21 @@ int main(void){
     Model* sphere = new Model("3D/sphere.obj", glm::vec3(0.5f, 0.f, 0.f));
     sphere->setScale(20.f);
 
+    float x, y, z;
+    std::cout << "Velocity:" << std::endl;
+    std::cout << "X: "; std::cin >> x;
+    std::cout << "Y: "; std::cin >> y;
+    std::cout << "Z: "; std::cin >> z;
+
+    using clock = std::chrono::high_resolution_clock;
+    auto curr_time = clock::now();
+    auto prev_time = curr_time;
+    std::chrono::nanoseconds curr_ns(0);
+    std::chrono::nanoseconds TotalTime(0);
+
     Particle particle = Particle();
     particle.position = Vector3(0.f, -500.f, 0.f);
-    particle.velocity = Vector3(0.f, 300.f, 0.f);
+    particle.velocity = Vector3(x, y ,z);
     particle.acceleration = Vector3(0.f, -50.f, 0.f);
     bool isHitGround = false;
 
@@ -110,7 +117,7 @@ int main(void){
             isHitGround = true;
 
             auto hit = std::chrono::duration_cast<std::chrono::milliseconds>(TotalTime);
-            std::cout << "Time taken: " << (float)hit.count() << "ms" << std::endl;
+            std::cout << "It took " << (float)hit.count() / 1000.f << " seconds for it to land" << std::endl;
 
             particle.velocity = Vector3(0.f, 0.f, 0.f);
             particle.acceleration = Vector3(0.f, 0.f, 0.f);
