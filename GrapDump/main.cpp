@@ -55,6 +55,10 @@ using namespace Physics;
 constexpr std::chrono::nanoseconds timestep(16ms);
 
 int main(void){
+    using clock = std::chrono::high_resolution_clock;
+    auto curr_time = clock::now();
+    auto prev_time = curr_time;
+    std::chrono::nanoseconds curr_ns(0);
 
     GLFWwindow* window = initializeGLFW();
     if (window == NULL)
@@ -76,19 +80,7 @@ int main(void){
     Physics::Vector3 pos = Physics::Vector3(-1.f, 0.f, 0.f);
 
     Model* sphere = new Model("3D/sphere.obj", glm::vec3(0.5f, 0.f, 0.f));
-    sphere->setScale(20.f);
-
-    float x, y, z;
-    std::cout << "Velocity:" << std::endl;
-    std::cout << "X: "; std::cin >> x;
-    std::cout << "Y: "; std::cin >> y;
-    std::cout << "Z: "; std::cin >> z;
-
-    using clock = std::chrono::high_resolution_clock;
-    auto curr_time = clock::now();
-    auto prev_time = curr_time;
-    std::chrono::nanoseconds curr_ns(0);
-    std::chrono::nanoseconds TotalTime(0);
+    sphere->setScale(10.f);
 
     Particle particle = Particle();
     particle.position = Vector3(0.f, -500.f, 0.f);
@@ -104,23 +96,12 @@ int main(void){
         prev_time = curr_time;
 
         curr_ns += dur;
-        TotalTime += dur;
-       
+
         if(curr_ns >= timestep){
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
             curr_ns -= curr_ns;
 
             particle.Update((double)(ms.count() / 1000.f));
-        }
-
-        if (particle.position.y < -500 && !isHitGround) {
-            isHitGround = true;
-
-            auto hit = std::chrono::duration_cast<std::chrono::milliseconds>(TotalTime);
-            std::cout << "It took " << (float)hit.count() / 1000.f << " seconds for it to land" << std::endl;
-
-            particle.velocity = Vector3(0.f, 0.f, 0.f);
-            particle.acceleration = Vector3(0.f, 0.f, 0.f);
         }
 
         orthoCam->apply(mainShader, NULL);
