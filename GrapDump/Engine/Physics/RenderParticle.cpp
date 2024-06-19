@@ -23,3 +23,7 @@ void RenderParticle::Render(Shader* shader){
         this->model->render(shader);
     }
 }
+
+Particle* RenderParticle::Base(){
+    return this->particle;
+}

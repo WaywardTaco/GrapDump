@@ -19,5 +19,6 @@ namespace Physics {
         public:
             void Update(double deltaTime);
             void Render(Shader* shader);
+            Particle* Base();
     };
 }

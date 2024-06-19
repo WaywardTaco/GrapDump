@@ -7,9 +7,10 @@
 #include <string>
 
 #include <cmath>
-#include "Vector3.hpp"
+#include "../Vector3.hpp"
 
 namespace Physics {
+    using namespace Engine;
     class Particle {
         public:
             double damping;

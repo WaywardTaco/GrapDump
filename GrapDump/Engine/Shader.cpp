@@ -9,7 +9,6 @@ Shader::Shader(std::string vertex_shader_source_path, std::string fragment_shade
         fragment_file(fragment_shader_source_path);
 
     std::stringstream vertex_stream, fragment_stream;
-
     vertex_stream << vertex_file.rdbuf();
     fragment_stream << fragment_file.rdbuf();
 

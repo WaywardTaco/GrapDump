@@ -1,7 +1,7 @@
 
 #include "Vector3.hpp"
 
-using namespace Physics;
+using namespace Engine;
 
 Vector3::Vector3(double x, double y, double z) : 
     x(x), y(y), z(z){}

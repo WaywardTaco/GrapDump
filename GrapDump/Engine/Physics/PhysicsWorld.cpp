@@ -15,7 +15,12 @@ void PhysicsWorld::Update(float deltaTime){
     for (std::list<Particle*>::iterator itr = particles.begin(); itr != particles.end(); itr++) {
         (*itr)->Update(deltaTime);
     }
+}
 
+void PhysicsWorld::ResetForces(){
+    for (std::list<Particle*>::iterator itr = particles.begin(); itr != particles.end(); itr++) {
+        (*itr)->ResetForce();
+    }
 }
 
 void PhysicsWorld::UpdateParticleList(){

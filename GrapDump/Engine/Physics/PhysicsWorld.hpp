@@ -18,6 +18,7 @@ namespace Physics {
         public:
             void AddParticle(Particle* particle);
             void Update(float deltaTime);
+            void ResetForces();
 
         private:
             void UpdateParticleList();
