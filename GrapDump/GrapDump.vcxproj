@@ -147,7 +147,13 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OrthoCamera.cpp" />
     <ClCompile Include="PerspectiveCamera.cpp" />
+    <ClCompile Include="Physics\ForceGenerator.cpp" />
+    <ClCompile Include="Physics\ForceGenerators\DragForceGenerator.cpp" />
+    <ClCompile Include="Physics\ForceGenerators\GravityForceGenerator.cpp" />
+    <ClCompile Include="Physics\ForceRegistry.cpp" />
     <ClCompile Include="Physics\Particle.cpp" />
+    <ClCompile Include="Physics\PhysicsWorld.cpp" />
+    <ClCompile Include="Physics\RenderParticle.cpp" />
     <ClCompile Include="Physics\Vector3.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PointLight.cpp" />
@@ -162,7 +168,13 @@
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="OrthoCamera.hpp" />
     <ClInclude Include="PerspectiveCamera.hpp" />
+    <ClInclude Include="Physics\ForceGenerator.hpp" />
+    <ClInclude Include="Physics\ForceGenerators\DragForceGenerator.hpp" />
+    <ClInclude Include="Physics\ForceGenerators\GravityForceGenerator.hpp" />
+    <ClInclude Include="Physics\ForceRegistry.hpp" />
     <ClInclude Include="Physics\Particle.hpp" />
+    <ClInclude Include="Physics\PhysicsWorld.hpp" />
+    <ClInclude Include="Physics\RenderParticle.hpp" />
     <ClInclude Include="Physics\Vector3.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="PointLight.hpp" />

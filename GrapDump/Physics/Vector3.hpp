@@ -20,6 +20,9 @@ namespace Physics {
             explicit operator std::string() const;
             explicit operator glm::vec3() const;
 
+            // COMPARISON
+            bool operator == (const Vector3 vec);
+
             // VECTOR ADD & SUBTRACT
             void operator += (const Vector3 vec);
             void operator -= (const Vector3 vec);
@@ -51,5 +54,9 @@ namespace Physics {
             // DIRECTION
             Vector3 normalize();
             Vector3 direction();
+
+            // DISTANCE
+            double distanceSqrdFrom(Vector3 vec);
+            double distanceFrom(Vector3 vec);
     };
 }

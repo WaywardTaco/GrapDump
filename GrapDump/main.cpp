@@ -3,6 +3,8 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 
+#include <iomanip>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -33,6 +35,9 @@
 #include "OrthoCamera.hpp"
 #include "Physics/Vector3.hpp"
 #include "Physics/Particle.hpp"
+#include "Physics/PhysicsWorld.hpp"
+#include "Physics/RenderParticle.hpp"
+#include "Physics/ForceGenerators//DragForceGenerator.hpp"
 //#include "Skybox.hpp"
 //#include "LightSource.hpp"
 //#include "PointLight.hpp"
@@ -41,10 +46,10 @@
 //#include "Player.hpp"
 
 const float
-    window_height = 1000,
-    window_width = 1000;
+    window_height = 700,
+    window_width = 700;
 const char* 
-    window_name = "Josiah Kurt B. Aviso & Dun Gerald C. Baniqued";
+    window_name = "Josiah Kurt B. Aviso";
 
 GLFWwindow* initializeGLFW();
 
@@ -61,40 +66,38 @@ int main(void){
         return -1;
 
     Shader* mainShader = new Shader("Shader/sample.vert", "Shader/sample.frag");
-    //Shader* skyboxShader = new Shader("Shader/Skybox.vert", "Shader/Skybox.frag");
-
-    // See Website for Reference: Anders Riggelsen - Visual glBlendFunc and glBlendEquation Tool
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glBlendEquation(GL_FUNC_ADD); 
+    PhysicsWorld world = PhysicsWorld();
+    std::list<RenderParticle*> renderedParticles;
 
     /* Object Declarations */
     OrthoCamera* orthoCam = new OrthoCamera();
-    orthoCam->setPosition(glm::vec3(0.f, 0.f, 1.f));
-    orthoCam->setProjection(glm::ortho( - 500.f, 500.f, -500.f, 500.f, 0.1f, 100.f));
+    orthoCam->setPosition(glm::vec3(0.f, 0.f, 350.f));
+    orthoCam->setProjection(glm::ortho( - 350.f, 350.f, -350.f, 350.f, 0.1f, 700.f));
 
-    Physics::Vector3 pos = Physics::Vector3(-1.f, 0.f, 0.f);
+    Model* particleSphere = new Model("3D/sphere.obj", glm::vec3(0.f, 0.f, 0.f));
+    particleSphere->setScale(15.f);
 
-    Model* sphere = new Model("3D/sphere.obj", glm::vec3(0.5f, 0.f, 0.f));
-    sphere->setScale(20.f);
+    Particle redParticle = Particle(1.0f);
+    redParticle.position = Vector3(0, 350, 0);
+    world.AddParticle(&redParticle);
+    renderedParticles.push_back(new RenderParticle(&redParticle, particleSphere, Vector3(0.6f, 0.f, 0.f)));
 
-    float x, y, z;
-    std::cout << "Velocity:" << std::endl;
-    std::cout << "X: "; std::cin >> x;
-    std::cout << "Y: "; std::cin >> y;
-    std::cout << "Z: "; std::cin >> z;
+
+    Particle blueParticle = Particle(1.0f);
+    blueParticle.position = Vector3(0, 350, 0);
+    world.AddParticle(&blueParticle);
+    renderedParticles.push_back(new RenderParticle(&blueParticle, particleSphere, Vector3(0.f, 0.f, 0.6f)));
+
+    // Wood on Ice
+    DragForceGenerator drag = DragForceGenerator(0.14f, 0.1f);
+    world.forceRegistry.Add(&redParticle, &drag);
+
 
     using clock = std::chrono::high_resolution_clock;
     auto curr_time = clock::now();
     auto prev_time = curr_time;
+    auto start_time = curr_time;
     std::chrono::nanoseconds curr_ns(0);
-    std::chrono::nanoseconds TotalTime(0);
-
-    Particle particle = Particle();
-    particle.position = Vector3(0.f, -500.f, 0.f);
-    particle.velocity = Vector3(x, y ,z);
-    particle.acceleration = Vector3(0.f, -50.f, 0.f);
-    bool isHitGround = false;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -104,33 +107,26 @@ int main(void){
         prev_time = curr_time;
 
         curr_ns += dur;
-        TotalTime += dur;
 
         if(curr_ns >= timestep){
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
             curr_ns -= curr_ns;
-
-            particle.Update((double)(ms.count() / 1000.f));
+            
+            world.Update(ms.count() / 1000.f);
         }
-        if (particle.position.y < -500 && !isHitGround) {
-            isHitGround = true;
-
-            auto hit = std::chrono::duration_cast<std::chrono::milliseconds>(TotalTime);
-            std::cout << "It took " << (float)hit.count() / 1000.f << " seconds for it to land" << std::endl;
-
-            particle.velocity = Vector3(0.f, 0.f, 0.f);
-            particle.acceleration = Vector3(0.f, 0.f, 0.f);
-        }
-
 
         orthoCam->apply(mainShader, NULL);
-        
-        sphere->setPosition((glm::vec3) particle.position);
-        sphere->render(mainShader);
 
-        //pos += Physics::Vector3(0.001, 0.f, 0.f);
+        for (RenderParticle* particle : renderedParticles) 
+            particle->Render(mainShader);
 
-        /* Render Frame and Wait for inputs, then resets window & depth buffer */
+        redParticle.ResetForce();
+        blueParticle.ResetForce();
+
+        redParticle.AddForce(Vector3(5, 0, 0));
+        blueParticle.AddForce(Vector3(5, 0, 0));
+
+        /* End of frame clear buffer */
         glfwSwapBuffers(window);
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -138,6 +134,10 @@ int main(void){
 
     glfwTerminate();
     return 0;
+}
+
+void Update() {
+
 }
 
 GLFWwindow* initializeGLFW() {
@@ -153,15 +153,6 @@ GLFWwindow* initializeGLFW() {
 
     glfwMakeContextCurrent(window);
     gladLoadGL();
-
-    /*
-    if (glfwRawMouseMotionSupported())
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
-    glfwSetCursorPosCallback(window, cursorCallback);
-    glfwSetMouseButtonCallback(window, mouse_callback);
-    glfwSetKeyCallback(window, keyCallback);
-    */
 
     glEnable(GL_DEPTH_TEST);
     

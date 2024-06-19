@@ -8,18 +8,25 @@ Vector3::Vector3(double x, double y, double z) :
 
 Vector3::operator std::string() const{
     std::string str;
-    str += "[";
+    str += "(";
     str += std::to_string(this->x);
     str += ", ";
     str += std::to_string(this->y);
     str += ", ";
     str += std::to_string(this->z);
-    str += "]";
+    str += ")";
     return str;
 }
 
 Vector3::operator glm::vec3() const{
     return glm::vec3(this->x, this->y, this->z);
+}
+
+bool Vector3::operator == (const Vector3 vec){
+    return 
+        this->x == vec.x &&
+        this->y == vec.y &&
+        this->z == vec.z;
 }
 
 void Vector3::operator += (const Vector3 vec){
@@ -135,4 +142,14 @@ Vector3 Vector3::normalize() {
 
 Vector3 Vector3::direction() {
     return this->normalize();
+}
+
+double Vector3::distanceSqrdFrom(Vector3 vec) {
+    return
+        (*this - vec).magnitudeSqrd();
+}
+
+double Vector3::distanceFrom(Vector3 vec) {
+    return
+        (*this - vec).magnitude();
 }
