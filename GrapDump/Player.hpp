@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "Model.hpp"
-#include "SpotLight.hpp"
-#include "PerspectiveCamera.hpp"
+#include "Engine/Model.hpp"
+#include "Engine/Lights/SpotLight.hpp"
+#include "Engine/Cameras/PerspectiveCamera.hpp"
 
 class Player {
 private:

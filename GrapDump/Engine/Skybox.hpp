@@ -11,10 +11,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
-#include "stb_image.h"
+#include "../stb_image.h"
 #endif
 
-#include "Camera.hpp"
+#include "Cameras/Camera.hpp"
 #include "Shader.hpp"
 
 class Skybox {

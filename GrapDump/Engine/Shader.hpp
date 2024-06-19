@@ -15,11 +15,11 @@
 
 #ifndef INCLUDE_TINYOBJ
 #define INCLUDE_TINYOBJ
-#include "tiny_obj_loader.h"
+#include "../tiny_obj_loader.h"
 #endif
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
-#include "stb_image.h"
+#include "../stb_image.h"
 #endif
 
 class Shader {
