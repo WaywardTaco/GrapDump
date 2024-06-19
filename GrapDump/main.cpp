@@ -70,7 +70,7 @@ int main(void){
     Particle* particleBase = new Particle(1.0);
     RenderParticle* particle = new RenderParticle(particleBase, particleSphere, Vector3(1.0, 0.0, 0.0));
 
-    engine->RegisterRenderParticle(particle);
+    engine->RegisterParticle(particle);
 
     // Wood on Ice
     DragForceGenerator drag = DragForceGenerator(0.14f, 0.1f);
