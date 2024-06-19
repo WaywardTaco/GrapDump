@@ -37,9 +37,18 @@ void GameEngine::RegisterShader(std::string shader_name, Shader* shader){
     this->registered_shaders[shader_name] = shader;
 }
 
-void GameEngine::RegisterRenderParticle(RenderParticle* particle){
+void GameEngine::RegisterParticle(Particle* particle){
+    this->physics_engine->AddParticle(particle);
+}
+
+void GameEngine::RegisterParticle(RenderParticle* particle){
     this->render_particles.push_back(particle);
-    this->physics_engine->AddParticle(particle->Base());
+    this->RegisterParticle(particle->Base());
+}
+
+void GameEngine::RegisterParticle(LifespanParticle* particle){
+    this->render_particles.push_back(particle);
+    this->RegisterParticle(particle->Base());
 }
 
 void GameEngine::RemoveParticle(RenderParticle* particle){

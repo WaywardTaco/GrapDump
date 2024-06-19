@@ -10,6 +10,7 @@
 #include "Cameras/Camera.hpp"
 #include "Physics/PhysicsWorld.hpp"
 #include "Physics/RenderParticle.hpp"
+#include "Physics/LifespanParticle.hpp"
 
 namespace Engine {
     using namespace std::chrono_literals;
@@ -28,7 +29,9 @@ namespace Engine {
 
             void Run();
             void RegisterShader(std::string shader_name, Shader* shader);
-            void RegisterRenderParticle(RenderParticle* particle);
+            void RegisterParticle(Particle* particle);
+            void RegisterParticle(RenderParticle* particle);
+            void RegisterParticle(LifespanParticle* particle);
             void RemoveParticle(RenderParticle* particle);
 
         private:
