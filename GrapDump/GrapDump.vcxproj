@@ -152,6 +152,7 @@
     <ClCompile Include="Engine\Physics\ForceGenerators\DragForceGenerator.cpp" />
     <ClCompile Include="Engine\Physics\ForceGenerators\GravityForceGenerator.cpp" />
     <ClCompile Include="Engine\Physics\ForceRegistry.cpp" />
+    <ClCompile Include="Engine\Physics\LifespanParticle.cpp" />
     <ClCompile Include="Engine\Physics\Particle.cpp" />
     <ClCompile Include="Engine\Physics\PhysicsWorld.cpp" />
     <ClCompile Include="Engine\Physics\RenderParticle.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="Engine\Physics\ForceGenerators\DragForceGenerator.hpp" />
     <ClInclude Include="Engine\Physics\ForceGenerators\GravityForceGenerator.hpp" />
     <ClInclude Include="Engine\Physics\ForceRegistry.hpp" />
+    <ClInclude Include="Engine\Physics\LifespanParticle.hpp" />
     <ClInclude Include="Engine\Physics\Particle.hpp" />
     <ClInclude Include="Engine\Physics\PhysicsWorld.hpp" />
     <ClInclude Include="Engine\Physics\RenderParticle.hpp" />

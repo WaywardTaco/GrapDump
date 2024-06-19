@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <RenderParticle.hpp>
+#include "RenderParticle.hpp"
 
 namespace Physics {
     class LifespanParticle : public RenderParticle {

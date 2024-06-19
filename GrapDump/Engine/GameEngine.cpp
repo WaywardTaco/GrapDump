@@ -55,6 +55,10 @@ void GameEngine::RemoveParticle(RenderParticle* particle){
     this->render_particles.remove(particle);
 }
 
+void GameEngine::SetActiveCam(Camera* camera){
+    this->main_camera = camera;
+}
+
 void GameEngine::Update(double deltaTime){
     this->physics_engine->Update(deltaTime);
 }

@@ -34,6 +34,8 @@ namespace Engine {
             void RegisterParticle(LifespanParticle* particle);
             void RemoveParticle(RenderParticle* particle);
 
+            void SetActiveCam(Camera* camera);
+
         private:
             void Update(double deltaTime);
             void Render();
