@@ -11,6 +11,7 @@
 #include "Physics/PhysicsWorld.hpp"
 #include "Physics/RenderParticle.hpp"
 #include "Physics/LifespanParticle.hpp"
+#include "ParticleGenerator.hpp"
 
 namespace Engine {
     using namespace std::chrono_literals;
@@ -20,11 +21,13 @@ namespace Engine {
             Window* render_window;
             PhysicsWorld* physics_engine;
             Camera* main_camera;
+            ParticleGenerator* particle_generator = NULL;
             std::unordered_map<std::string, Shader*> registered_shaders;
             std::list<RenderParticle*> render_particles;
 
         public:
             GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* mainCamera, Shader* mainShader);
+            GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* mainCamera, Shader* mainShader, ParticleGenerator* particleGenerator);
             ~GameEngine();
 
             void Run();

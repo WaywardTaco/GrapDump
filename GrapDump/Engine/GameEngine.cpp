@@ -60,6 +60,11 @@ void GameEngine::SetActiveCam(Camera* camera){
 }
 
 void GameEngine::Update(double deltaTime){
+    if (particle_generator != NULL) {
+        int limit = particle_generator->toLimit(this->physics_engine->particles.size());
+        for (int i = 0; i < limit; i++) this->RegisterParticle(this->particle_generator->GenerateLifespanParticle());
+    }
+
     this->physics_engine->Update(deltaTime);
 }
 
@@ -80,6 +85,12 @@ Shader* GameEngine::getShader(std::string shaderName){
 
 GameEngine::GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* mainCamera, Shader* mainShader) :
     render_window(renderWindow), physics_engine(physicsEngine), main_camera(mainCamera)
+{
+    this->RegisterShader("_mainShader", mainShader);
+}
+
+GameEngine::GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* mainCamera, Shader* mainShader, ParticleGenerator* particleGenerator) :
+    render_window(renderWindow), physics_engine(physicsEngine), main_camera(mainCamera), particle_generator(particleGenerator)
 {
     this->RegisterShader("_mainShader", mainShader);
 }

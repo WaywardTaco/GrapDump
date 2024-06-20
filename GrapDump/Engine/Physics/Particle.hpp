@@ -7,6 +7,7 @@
 #include <string>
 
 #include <cmath>
+#include <cstdlib>
 #include "../Vector3.hpp"
 
 namespace Physics {
@@ -14,6 +15,7 @@ namespace Physics {
     class Particle {
         public:
             double damping;
+            double lifespan;
 
             double mass;
             Vector3 position;
@@ -30,6 +32,7 @@ namespace Physics {
         protected:
             void UpdatePosition(double deltaTime);
             void UpdateVelocity(double deltaTime);
+            void UpdateLifespan(double deltaTime);
 
         public:
             void Update(double deltaTime);

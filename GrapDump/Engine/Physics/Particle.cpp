@@ -11,12 +11,13 @@ Particle::Particle(double mass = 1.0f) :
     velocity(Vector3(0.f, 0.f, 0.f)),
     acceleration(Vector3(0.f, 0.f, 0.f)),
     accumulatedForce(Vector3(0.f, 0.f, 0.f)),
+    lifespan(rand() % 10 + 1),
     destroyed(false){}
 
 void Particle::UpdatePosition(double deltaTime){
     this->position += 
-        this->velocity * deltaTime + 
-        this->acceleration * deltaTime * deltaTime / 2.f;
+    this->velocity * deltaTime + 
+    this->acceleration * deltaTime * deltaTime / 2.f;
 }
 
 void Particle::UpdateVelocity(double deltaTime){
@@ -26,9 +27,15 @@ void Particle::UpdateVelocity(double deltaTime){
     this->velocity = this->velocity * powf(this->damping, deltaTime);
 }
 
+void Particle::UpdateLifespan(double deltaTime) {
+    this->lifespan -= deltaTime;
+    if (lifespan <= 0) this->Destroy();
+}
+
 void Particle::Update(double deltaTime){
     this->UpdatePosition(deltaTime);
     this->UpdateVelocity(deltaTime);
+    this->UpdateLifespan(deltaTime);
 }
 
 void Particle::Destroy(){

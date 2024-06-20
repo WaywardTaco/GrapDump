@@ -11,10 +11,12 @@ namespace Physics {
             Particle* particle;
             Model* model;
             Vector3* customColor;
+            float scale;
 
         public:
             RenderParticle(Particle* particle, Model* model);
             RenderParticle(Particle* particle, Model* model, Vector3 customColor);
+            RenderParticle(Particle* particle, Model* model, Vector3 customColor, float scale);
 
         public:
             void Update(double deltaTime);

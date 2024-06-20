@@ -16,6 +16,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <cstdlib>
 #include <iostream>
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
@@ -35,6 +36,7 @@
 #include "Engine/Cameras/OrthoCamera.hpp"
 #include "Engine/Cameras/PerspectiveCamera.hpp"
 #include "Engine/Vector3.hpp"
+#include "Engine/ParticleGenerator.hpp"
 #include "Engine/Physics/Particle.hpp"
 #include "Engine/Physics/PhysicsWorld.hpp"
 #include "Engine/Physics/RenderParticle.hpp"
@@ -50,6 +52,9 @@ using namespace Physics;
 using namespace Engine;
 
 int main(void){
+    /* seed for random number generation */
+    srand((unsigned)time(NULL));
+
     /* Object Declarations */
     OrthoCamera* orthoCam = new OrthoCamera();
     orthoCam->setPosition(glm::vec3(0.f, 0.f, 350.f));
@@ -61,21 +66,17 @@ int main(void){
     
     Window* window = new Window("PC01 Josiah Aviso & Dun Baniqued", 700, 700);
     PhysicsWorld* world = new PhysicsWorld();
+    
+    int num;
+    std::cout << "Enter Limit: "; std::cin >> num;
+    ParticleGenerator* generator = new ParticleGenerator(num);
 
     GameEngine* engine = new GameEngine(
-        window, 
-        world, 
+        window,
+        world,
         orthoCam,
-        new Shader("Shader/sample.vert", "Shader/sample.frag"));
-
-    Model* particleSphere = new Model("3D/sphere.obj", glm::vec3(0.f, 0.f, 0.f));
-    particleSphere->setScale(15.f);
-
-    for(int i = 0; i < 10; i++){
-        RenderParticle* particle = new RenderParticle(new Particle(1.0f), particleSphere, Vector3(1.0, 0.0 + i, 1.0 - i));
-        particle->Base()->position = Vector3(0.0, 1.0 + i*50, 0.0);
-        engine->RegisterParticle(particle);
-    }
+        new Shader("Shader/sample.vert", "Shader/sample.frag"),
+        generator);
 
     engine->Run();
 

@@ -148,6 +148,7 @@
     <ClCompile Include="Engine\Lights\PointLight.cpp" />
     <ClCompile Include="Engine\Lights\SpotLight.cpp" />
     <ClCompile Include="Engine\Model.cpp" />
+    <ClCompile Include="Engine\ParticleGenerator.cpp" />
     <ClCompile Include="Engine\Physics\ForceGenerator.cpp" />
     <ClCompile Include="Engine\Physics\ForceGenerators\DragForceGenerator.cpp" />
     <ClCompile Include="Engine\Physics\ForceGenerators\GravityForceGenerator.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="Engine\Lights\PointLight.hpp" />
     <ClInclude Include="Engine\Lights\SpotLight.hpp" />
     <ClInclude Include="Engine\Model.hpp" />
+    <ClInclude Include="Engine\ParticleGenerator.hpp" />
     <ClInclude Include="Engine\Physics\ForceGenerator.hpp" />
     <ClInclude Include="Engine\Physics\ForceGenerators\DragForceGenerator.hpp" />
     <ClInclude Include="Engine\Physics\ForceGenerators\GravityForceGenerator.hpp" />

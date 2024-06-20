@@ -9,6 +9,10 @@ RenderParticle::RenderParticle(Particle* particle, Model* model) :
 RenderParticle::RenderParticle(Particle* particle, Model* model, Vector3 customColor) :
     particle(particle), model(model), customColor(new Vector3(customColor)){}
 
+RenderParticle::RenderParticle(Particle* particle, Model* model, Vector3 customColor, float scale) :
+    particle(particle), model(model), customColor(new Vector3(customColor)), scale(scale) {}
+
+
 void RenderParticle::Update(double deltaTime){
     this->particle->Update(deltaTime);
 }
@@ -19,6 +23,9 @@ void RenderParticle::Render(Shader* shader){
 
         if(this->customColor != NULL)
             this->model->setBaseColor((glm::vec3) *(this->customColor));
+
+        if (this->scale != NULL)
+            this->model->setScale(this->scale);
 
         this->model->render(shader);
     }
