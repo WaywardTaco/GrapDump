@@ -17,6 +17,8 @@
 #include "Cameras/Camera.hpp"
 #include "Shader.hpp"
 
+namespace Engine {
+
 class Skybox {
 private:
 	unsigned int 
@@ -33,3 +35,4 @@ public:
 
 	void render(Shader* shader);
 };
+}

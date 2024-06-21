@@ -164,7 +164,6 @@
     <ClCompile Include="Engine\Window.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Cameras\Camera.hpp" />
@@ -190,7 +189,6 @@
     <ClInclude Include="Engine\Skybox.hpp" />
     <ClInclude Include="Engine\Vector3.hpp" />
     <ClInclude Include="Engine\Window.hpp" />
-    <ClInclude Include="Player.hpp" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>

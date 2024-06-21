@@ -3,18 +3,23 @@
 
 #include "Camera.hpp"
 
-class PerspectiveCamera : public Camera {
-private:
-	float
-		FOV, aspectRatio, zNear, zFar;
+namespace Engine {
+	class PerspectiveCamera : public Camera {
+		private:
+			float
+				FOV, 
+				aspectRatio, 
+				zNear, 
+				zFar;
 
-public:
-	PerspectiveCamera();
+		public:
+			PerspectiveCamera();
 
-	void apply(Shader* object_shader, Shader* skybox_shader);
+			void apply(Shader* object_shader, Shader* skybox_shader);
 
-	void setFOV(float FOV);
-	void setAspectRatio(float heightByWidth);
-	void setZnear(float zNear);
-	void setZfar(float zFar);
-};
+			void setFOV(float FOV);
+			void setAspectRatio(float heightByWidth);
+			void setZnear(float zNear);
+			void setZfar(float zFar);
+	};
+}

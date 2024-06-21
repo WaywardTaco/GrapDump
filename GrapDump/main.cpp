@@ -41,21 +41,16 @@
 #include "Engine/Physics/PhysicsWorld.hpp"
 #include "Engine/Physics/RenderParticle.hpp"
 #include "Engine/Physics/ForceGenerators/DragForceGenerator.hpp"
-//#include "Skybox.hpp"
-//#include "LightSource.hpp"
-//#include "PointLight.hpp"
-//#include "DirectionLight.hpp"
-//#include "SpotLight.hpp"
-//#include "Player.hpp"
 
 using namespace Physics;
 using namespace Engine;
 
 int main(void){
-    /* seed for random number generation */
-    srand((unsigned)time(NULL));
 
-    /* Object Declarations */
+    /* Scene Setup */
+    Window* window = new Window("MP Phase 1 Group 3 - Josiah Aviso & Dun Baniqued", 800, 800);
+    PhysicsWorld* world = new PhysicsWorld();
+
     OrthoCamera* orthoCam = new OrthoCamera();
     orthoCam->setPosition(glm::vec3(0.f, 0.f, 400.f));
     orthoCam->setProjection(glm::ortho( - 400.f, 400.f, -400.f, 400.f, 0.1f, 800.f)); 
@@ -66,13 +61,12 @@ int main(void){
     perspectiveCam->setProjection(glm::perspective(glm::radians(120.f), 1.f, 0.1f, 800.f));
     perspectiveCam->setCenter(glm::vec3(0.f, 0.f, 0.f));
     
-    Window* window = new Window("Group 3 - Josiah Aviso & Dun Baniqued", 800, 800);
-    PhysicsWorld* world = new PhysicsWorld();
-    
+    /* User Input for particle limit */
     int num;
     std::cout << "Enter Limit: "; std::cin >> num;
     ParticleGenerator* generator = new ParticleGenerator(num, Vector3(0.f, -300.f, 0.f));
 
+    /* Initialize the Engine */
     GameEngine* engine = new GameEngine(
         window,
         world,
@@ -81,6 +75,7 @@ int main(void){
         new Shader("Shader/sample.vert", "Shader/sample.frag"),
         generator);
 
+    /* Run the Engine */
     engine->Run();
 
     return 0;

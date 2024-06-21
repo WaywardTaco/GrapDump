@@ -2,6 +2,8 @@
 #include "SpotLight.hpp"
 #include <iostream>
 
+using namespace Engine;
+
 SpotLight::SpotLight() :
 	PointLight(), 
     direction({0.f, 0.f, 1.f}), 
@@ -10,18 +12,18 @@ SpotLight::SpotLight() :
 
 void SpotLight::apply(Shader* shader) {
 
-    shader->passVec3("spotLight.direction", this->direction);
-    shader->passFloat("spotLight.innerCutoff", this->innerCutoff);
-    shader->passFloat("spotLight.outerCutoff", this->outerCutoff);
+    shader->passData("spotLight.direction", this->direction);
+    shader->passData("spotLight.innerCutoff", this->innerCutoff);
+    shader->passData("spotLight.outerCutoff", this->outerCutoff);
 
-    shader->passVec3("spotLight.base.position", this->position);
+    shader->passData("spotLight.base.position", this->position);
 
-    shader->passVec3("spotLight.base.color", this->color);
-    shader->passFloat("spotLight.base.brightness", this->brightness);
-    shader->passFloat("spotLight.base.ambientStr", this->ambientStrength);
-    shader->passVec3("spotLight.base.ambientCol", this->ambientColor);
-    shader->passFloat("spotLight.base.specStr", this->specularStrength);
-    shader->passFloat("spotLight.base.specPhong", this->specularPhong);
+    shader->passData("spotLight.base.color", this->color);
+    shader->passData("spotLight.base.brightness", this->brightness);
+    shader->passData("spotLight.base.ambientStr", this->ambientStrength);
+    shader->passData("spotLight.base.ambientCol", this->ambientColor);
+    shader->passData("spotLight.base.specStr", this->specularStrength);
+    shader->passData("spotLight.base.specPhong", this->specularPhong);
 }
 
 void SpotLight::setCutoffs(float inner, float outer) {

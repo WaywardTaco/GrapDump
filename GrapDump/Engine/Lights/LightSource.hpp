@@ -10,6 +10,8 @@
 
 #include "../Shader.hpp"
 
+namespace Engine {
+
 class LightSource {
 protected:
 	glm::vec3
@@ -33,3 +35,4 @@ public:
 	void setSpecPhong(float phong);
 
 };
+}

@@ -4,6 +4,8 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 
+using namespace Engine;
+
 Model::Model(std::string modelPath, std::string texturePath) :
     position(0.f), modelScale(1.f), rotation(1.f), modelBaseColor(1.f), hasTexture(true), hasNormMap(false), normalMap(0),
     tangents({}), bitangents({})
@@ -377,13 +379,13 @@ void Model::render(Shader* shader) {
     transform = glm::scale(transform, this->modelScale);
     transform = transform * this->rotation;
 
-    shader->passMat4("transform", transform);
-    shader->passVec3("modelBaseColor", this->modelBaseColor);
-    shader->passBool("modelHasTexture", this->hasTexture);
-    shader->passBool("modelHasNormMap", this->hasNormMap);
+    shader->passData("transform", transform);
+    shader->passData("modelBaseColor", this->modelBaseColor);
+    shader->passData("modelHasTexture", this->hasTexture);
+    shader->passData("modelHasNormMap", this->hasNormMap);
     
-    shader->pass2DTexture("tex0", this->texture, 0);
-    shader->pass2DTexture("norm_tex", this->normalMap, 1);
+    shader->passData("tex0", this->texture, 0);
+    shader->passData("norm_tex", this->normalMap, 1);
 
     /* Render VAO w/ shader */
     shader->use();

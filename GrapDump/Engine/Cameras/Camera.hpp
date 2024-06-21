@@ -11,32 +11,34 @@
 
 #include "../Shader.hpp"
 
-class Camera {
-protected:
-	glm::vec3 
-		position,
-		center,
-		worldUp;
+namespace Engine {
+	class Camera {
+		protected:
+			glm::vec3 
+				_position,
+				_center,
+				_worldUp;
 
-	glm::mat4 projection;
+			glm::mat4 _projection;
 
-public:
-	Camera(glm::mat4 projection);
+		public:
+			Camera(glm::mat4 projection);
 
-public:
-	virtual void apply(Shader* object_shader, Shader* skybox_shader);
+		public:
+			virtual void apply(Shader* object_shader, Shader* skybox_shader);
 
-	void moveBy(glm::vec3 move);
-	void moveTo(glm::vec3 move);
-	void rotateAround(glm::vec3 center, float degrees, glm::vec3 axis);
-	void rotateAroundLocal(glm::vec3 center, float degrees, glm::vec3 axis);
-	void turn(float degrees, glm::vec3 axis);
+			void moveBy(glm::vec3 move);
+			void moveTo(glm::vec3 move);
+			void rotateAround(glm::vec3 center, float degrees, glm::vec3 axis);
+			void rotateAroundLocal(glm::vec3 center, float degrees, glm::vec3 axis);
+			void turn(float degrees, glm::vec3 axis);
 
-	void setPosition(glm::vec3 position);
-	void setCenter(glm::vec3 center);
-	void setProjection(glm::mat4 projection);
-	void setWorldUp(glm::vec3 worldUp);
+			void setPosition(glm::vec3 position);
+			void setCenter(glm::vec3 center);
+			void setProjection(glm::mat4 projection);
+			void setWorldUp(glm::vec3 worldUp);
 
-	glm::mat4 getViewMat();
-	glm::vec3 getCenter();
-};
+			glm::mat4 getViewMat();
+			glm::vec3 getCenter();
+	};
+}

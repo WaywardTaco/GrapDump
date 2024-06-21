@@ -20,6 +20,8 @@
 #include "../stb_image.h"
 #endif
 
+namespace Engine {
+
 class Model {
 private:
     bool success;
@@ -66,3 +68,4 @@ public:
     void setScale(glm::vec3 scale);
     void setBaseColor(glm::vec3 color);
 };
+}

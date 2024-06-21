@@ -1,6 +1,8 @@
 
 #include "LightSource.hpp"
 
+using namespace Engine;
+
 LightSource::LightSource() :
 	color(1.f), ambientColor(1.f), brightness(150.f),
 	ambientStrength(0.1f), specularStrength(0.5f), specularPhong(16.f) {}

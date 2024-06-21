@@ -19,8 +19,10 @@ namespace Engine {
     using namespace Physics;
     class GameEngine {
         private:
+            /* Tracker for physics pausing */
             bool isPhysicsPaused;
 
+            /* Objects to be registered in the engine */
             Window* render_window;
             PhysicsWorld* physics_engine;
             Camera* main_camera;
@@ -31,25 +33,28 @@ namespace Engine {
             std::list<RenderParticle*> render_particles;
 
         public:
+            /* Constructor requiring relevant objects */
             GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* orthoCam, Camera* perspectiveCam, Shader* mainShader, ParticleGenerator* particleGenerator);
             ~GameEngine();
 
             void Run();
-            void RegisterShader(std::string shader_name, Shader* shader);
-            void RegisterParticle(Particle* particle);
-            void RegisterParticle(RenderParticle* particle);
             void RegisterParticle(LifespanParticle* particle);
             void RemoveParticle(RenderParticle* particle);
 
-            void SetActiveCam(Camera* camera);
-
         private:
+            /* Gameloop utility functions */
             void Update(double deltaTime);
             void Render();
-            Shader* getShader(std::string shaderName);
-
             void UpdateObjects(double deltaTime);
+
+            /* Utility functions for internal logic */
+            void RegisterShader(std::string shader_name, Shader* shader);
+            void RegisterParticle(Particle* particle);
+            void RegisterParticle(RenderParticle* particle);
+
+            Shader* getShader(std::string shaderName);
     };
 
+    /* Callback function for key input */
     void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 }

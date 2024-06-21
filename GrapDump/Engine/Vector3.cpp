@@ -7,6 +7,8 @@ Vector3::Vector3(double x, double y, double z) :
     x(x), y(y), z(z){}
 
 Vector3::operator std::string() const{
+    /* Vector gets compressed into a 
+        string with its components */
     std::string str;
     str += "(";
     str += std::to_string(this->x);
@@ -129,7 +131,7 @@ double Vector3::magnitudeSqrd() {
         this->x * this->x +
         this->y * this->y +
         this->z * this->z 
-        );
+    );
 }
 
 double Vector3::magnitude() {

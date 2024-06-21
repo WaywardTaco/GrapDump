@@ -3,6 +3,8 @@
 
 #include "LightSource.hpp"
 
+namespace Engine {
+	
 class DirectionLight : public LightSource {
 private:
 	glm::vec3 direction;
@@ -15,3 +17,4 @@ public:
 	void setDirection(glm::vec3 direction);
 	void rotate(float degrees, glm::vec3 axis);
 };
+}

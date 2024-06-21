@@ -3,6 +3,8 @@
 
 #include "LightSource.hpp"
 
+namespace Engine {
+
 class PointLight : public LightSource {
 protected:
 	glm::vec3 position;
@@ -20,3 +22,4 @@ public:
 
 	void move(glm::vec3 move);
 };
+}

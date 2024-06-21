@@ -3,6 +3,8 @@
 
 #include "Camera.hpp"
 
+namespace Engine {
+
 class OrthoCamera : public Camera {
 
 public:
@@ -16,3 +18,4 @@ public:
 		float zNear,
 		float zFar);
 };
+}

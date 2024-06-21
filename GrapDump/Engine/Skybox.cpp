@@ -4,6 +4,8 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 
+using namespace Engine;
+
 Skybox::Skybox(
 	std::string rightTex,
 	std::string leftTex,

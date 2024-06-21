@@ -18,6 +18,7 @@ void RenderParticle::Update(double deltaTime){
 }
 
 void RenderParticle::Render(Shader* shader){
+    /* Renders the particle's base to the particle's position and based on color */
     if(!this->particle->isDestroyed()){
         this->model->setPosition((glm::vec3) this->particle->position);
 

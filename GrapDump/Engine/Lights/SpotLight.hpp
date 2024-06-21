@@ -3,6 +3,8 @@
 
 #include "PointLight.hpp"
 
+namespace Engine {
+
 class SpotLight : public PointLight {
 private: 
 	glm::vec3 direction;
@@ -18,3 +20,4 @@ public:
 	void setCutoffs(float inner, float outer);
 	void setDirection(glm::vec3 direction);
 };
+}

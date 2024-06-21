@@ -5,6 +5,7 @@
 
 namespace Physics {
     class LifespanParticle : public RenderParticle {
+        /* A reference class for particles with a lifespan */
         private:
             double _lifespan;
 

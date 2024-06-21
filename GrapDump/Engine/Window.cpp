@@ -6,6 +6,7 @@ using namespace Engine;
 Window::Window(std::string window_name, int window_width, int window_height) :
     isOpen(true)
 {
+    /* GLFW and window initializations */
     this->window = NULL;
     
     if (!glfwInit()) {
@@ -32,17 +33,17 @@ Window::~Window(){
 }
 
 void Window::Update(){
+    /* Stops rendering to a closed window */
     if(!this->IsOpen()) return;
 
+    /* Sets buffer to window frame and clears it for the next render update */
     glfwSwapBuffers(this->window);
-    glfwPollEvents();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 bool Window::IsOpen(){
     if(glfwWindowShouldClose(this->window) || this->window == NULL)
         this->isOpen = false;
-    
     return this->isOpen;
 }
 

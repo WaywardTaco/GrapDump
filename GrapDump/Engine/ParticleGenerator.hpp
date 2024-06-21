@@ -1,11 +1,15 @@
 #pragma once
 
-#include "Model.hpp"
 #include "Physics/LifespanParticle.hpp"
+#include "Model.hpp"
 #include "Vector3.hpp"
 
-using namespace Physics;
+namespace Physics {
+	class LifespanParticle;
+}
+
 namespace Engine {
+using namespace Physics;
 
 class ParticleGenerator
 {

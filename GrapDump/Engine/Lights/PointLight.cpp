@@ -1,6 +1,8 @@
 
 #include "PointLight.hpp"
 
+using namespace Engine;
+
 PointLight::PointLight() 
 	: LightSource(), position(0.f) {}
 
@@ -8,14 +10,14 @@ PointLight::PointLight(glm::vec3 position)
 	: LightSource(), position(position) {}
 
 void PointLight::apply(Shader* shader) {
-    shader->passVec3("pointLight.position", this->position);
+    shader->passData("pointLight.position", this->position);
 
-    shader->passVec3("pointLight.color", this->color);
-    shader->passFloat("pointLight.brightness", this->brightness);
-    shader->passFloat("pointLight.ambientStr", this->ambientStrength);
-    shader->passVec3("pointLight.ambientCol", this->ambientColor);
-    shader->passFloat("pointLight.specStr", this->specularStrength);
-    shader->passFloat("pointLight.specPhong", this->specularPhong);
+    shader->passData("pointLight.color", this->color);
+    shader->passData("pointLight.brightness", this->brightness);
+    shader->passData("pointLight.ambientStr", this->ambientStrength);
+    shader->passData("pointLight.ambientCol", this->ambientColor);
+    shader->passData("pointLight.specStr", this->specularStrength);
+    shader->passData("pointLight.specPhong", this->specularPhong);
 }
 
 void PointLight::rotateAround(glm::vec3 center, float degrees, glm::vec3 axis) {

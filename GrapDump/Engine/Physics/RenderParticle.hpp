@@ -14,6 +14,7 @@ namespace Physics {
             float scale;
 
         public:
+            /* Various constructors for flexibility */
             RenderParticle(Particle* particle, Model* model);
             RenderParticle(Particle* particle, Model* model, Vector3 customColor);
             RenderParticle(Particle* particle, Model* model, Vector3 customColor, float scale);

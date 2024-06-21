@@ -28,6 +28,7 @@ void Particle::UpdateVelocity(double deltaTime){
 }
 
 void Particle::UpdateLifespan(double deltaTime) {
+    /* Lifespan deterioration */
     this->lifespan -= deltaTime;
     if (lifespan <= 0) this->Destroy();
 }
