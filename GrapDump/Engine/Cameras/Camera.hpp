@@ -29,6 +29,7 @@ public:
 	void moveBy(glm::vec3 move);
 	void moveTo(glm::vec3 move);
 	void rotateAround(glm::vec3 center, float degrees, glm::vec3 axis);
+	void rotateAroundLocal(glm::vec3 center, float degrees, glm::vec3 axis);
 	void turn(float degrees, glm::vec3 axis);
 
 	void setPosition(glm::vec3 position);

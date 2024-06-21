@@ -58,11 +58,13 @@ int main(void){
     /* Object Declarations */
     OrthoCamera* orthoCam = new OrthoCamera();
     orthoCam->setPosition(glm::vec3(0.f, 0.f, 400.f));
-    orthoCam->setProjection(glm::ortho( - 400.f, 400.f, -400.f, 400.f, 0.1f, 800.f));    
+    orthoCam->setProjection(glm::ortho( - 400.f, 400.f, -400.f, 400.f, 0.1f, 800.f)); 
+    orthoCam->setCenter(glm::vec3(0.f, 0.f, 0.f));
     
     PerspectiveCamera* perspectiveCam = new PerspectiveCamera();
     perspectiveCam->setPosition(glm::vec3(0.f, -100.f, 400.f));
     perspectiveCam->setProjection(glm::perspective(glm::radians(120.f), 1.f, 0.1f, 800.f));
+    perspectiveCam->setCenter(glm::vec3(0.f, 0.f, 0.f));
     
     Window* window = new Window("Group 3 - Josiah Aviso & Dun Baniqued", 800, 800);
     PhysicsWorld* world = new PhysicsWorld();
@@ -74,6 +76,7 @@ int main(void){
     GameEngine* engine = new GameEngine(
         window,
         world,
+        orthoCam,
         perspectiveCam,
         new Shader("Shader/sample.vert", "Shader/sample.frag"),
         generator);

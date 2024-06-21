@@ -7,6 +7,7 @@
 
 #include "Window.hpp"
 #include "Shader.hpp"
+#include "InputSystem.hpp"
 #include "Cameras/Camera.hpp"
 #include "Physics/PhysicsWorld.hpp"
 #include "Physics/RenderParticle.hpp"
@@ -18,16 +19,19 @@ namespace Engine {
     using namespace Physics;
     class GameEngine {
         private:
+            bool isPhysicsPaused;
+
             Window* render_window;
             PhysicsWorld* physics_engine;
             Camera* main_camera;
+            Camera* ortho_camera;
+            Camera* perspective_camera;
             ParticleGenerator* particle_generator = NULL;
             std::unordered_map<std::string, Shader*> registered_shaders;
             std::list<RenderParticle*> render_particles;
 
         public:
-            GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* mainCamera, Shader* mainShader);
-            GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* mainCamera, Shader* mainShader, ParticleGenerator* particleGenerator);
+            GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* orthoCam, Camera* perspectiveCam, Shader* mainShader, ParticleGenerator* particleGenerator);
             ~GameEngine();
 
             void Run();
@@ -43,5 +47,9 @@ namespace Engine {
             void Update(double deltaTime);
             void Render();
             Shader* getShader(std::string shaderName);
+
+            void UpdateObjects(double deltaTime);
     };
+
+    void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 }

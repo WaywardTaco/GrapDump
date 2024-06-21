@@ -45,3 +45,7 @@ bool Window::IsOpen(){
     
     return this->isOpen;
 }
+
+GLFWwindow* Window::Base(){
+    return this->window;
+}

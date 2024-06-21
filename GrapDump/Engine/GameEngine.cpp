@@ -19,6 +19,7 @@ void GameEngine::Run(){
 
         curr_ns += dur;
 
+        glfwPollEvents();
         if(curr_ns >= timestep){
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
             curr_ns -= curr_ns;
@@ -60,12 +61,47 @@ void GameEngine::SetActiveCam(Camera* camera){
 }
 
 void GameEngine::Update(double deltaTime){
+    this->UpdateObjects(deltaTime);
+
+    if(this->isPhysicsPaused)
+        return;
+
     if (particle_generator != NULL) {
         int limit = particle_generator->toLimit(this->physics_engine->particles.size());
         for (int i = 0; i < limit; i++) this->RegisterParticle(this->particle_generator->GenerateLifespanParticle());
     }
 
     this->physics_engine->Update(deltaTime);
+    
+}
+
+void GameEngine::UpdateObjects(double deltaTime){
+    float camRotationAngle = 5.f;
+
+    if(InputSystem::Instance()->key_Space){
+        this->isPhysicsPaused = !this->isPhysicsPaused;
+        InputSystem::Instance()->key_Space = false;
+    }
+
+    if(InputSystem::Instance()->key_1)
+        this->main_camera = this->ortho_camera;
+    if(InputSystem::Instance()->key_2)
+        this->main_camera = this->perspective_camera;
+
+    if(InputSystem::Instance()->key_W){
+        this->main_camera->rotateAroundLocal((glm::vec3)Vector3(0.f,0.f,0.f), camRotationAngle, (glm::vec3)Vector3(1.f,0.f,0.f));
+    }
+    if(InputSystem::Instance()->key_S){
+        this->main_camera->rotateAroundLocal((glm::vec3)Vector3(0.f,0.f,0.f), -camRotationAngle, (glm::vec3)Vector3(1.f,0.f,0.f));
+    }
+
+    if(InputSystem::Instance()->key_A){
+        this->main_camera->rotateAround((glm::vec3)Vector3(0.f,0.f,0.f), -camRotationAngle, (glm::vec3)Vector3(0.f,1.f,0.f));
+    }
+    if(InputSystem::Instance()->key_D){
+        this->main_camera->rotateAround((glm::vec3)Vector3(0.f,0.f,0.f), camRotationAngle, (glm::vec3)Vector3(0.f,1.f,0.f));
+    }
+
 }
 
 void GameEngine::Render(){
@@ -83,16 +119,11 @@ Shader* GameEngine::getShader(std::string shaderName){
     return this->registered_shaders[shaderName];
 }
 
-GameEngine::GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* mainCamera, Shader* mainShader) :
-    render_window(renderWindow), physics_engine(physicsEngine), main_camera(mainCamera)
+GameEngine::GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* orthoCam, Camera* perspectiveCam, Shader* mainShader, ParticleGenerator* particleGenerator) :
+    isPhysicsPaused(false), render_window(renderWindow), physics_engine(physicsEngine), main_camera(orthoCam), ortho_camera(orthoCam), perspective_camera(perspectiveCam), particle_generator(particleGenerator)
 {
     this->RegisterShader("_mainShader", mainShader);
-}
-
-GameEngine::GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* mainCamera, Shader* mainShader, ParticleGenerator* particleGenerator) :
-    render_window(renderWindow), physics_engine(physicsEngine), main_camera(mainCamera), particle_generator(particleGenerator)
-{
-    this->RegisterShader("_mainShader", mainShader);
+    glfwSetKeyCallback(this->render_window->Base(), Engine::keyCallback);
 }
 
 GameEngine::~GameEngine(){
@@ -107,4 +138,37 @@ GameEngine::~GameEngine(){
     delete this->render_window;
     delete this->physics_engine;
     delete this->main_camera;
+}
+
+void Engine::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
+    bool isPressed = false;
+    if(action == GLFW_PRESS){
+        isPressed = true;
+    }
+    else if(action == GLFW_RELEASE)
+        isPressed = false;
+
+    switch(key){
+        case GLFW_KEY_1:
+            InputSystem::Instance()->key_1 = isPressed;
+            break;
+        case GLFW_KEY_2:
+            InputSystem::Instance()->key_2 = isPressed;
+            break;
+        case GLFW_KEY_W:
+            InputSystem::Instance()->key_W = isPressed;
+            break;
+        case GLFW_KEY_A:
+            InputSystem::Instance()->key_A = isPressed;
+            break;
+        case GLFW_KEY_S:
+            InputSystem::Instance()->key_S = isPressed;
+            break;
+        case GLFW_KEY_D:
+            InputSystem::Instance()->key_D = isPressed;
+            break;
+        case GLFW_KEY_SPACE:
+            InputSystem::Instance()->key_Space = isPressed;
+            break;
+    }   
 }

@@ -23,5 +23,7 @@ namespace Engine {
             void Update();
             
             bool IsOpen();
+
+            GLFWwindow* Base();
     };
 }
