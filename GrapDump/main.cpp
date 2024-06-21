@@ -63,7 +63,7 @@ int main(void){
     
     /* User Input for particle limit */
     int num;
-    std::cout << "Enter Limit: "; std::cin >> num;
+    std::cout << "Enter Particle Limit: "; std::cin >> num;
     ParticleGenerator* generator = new ParticleGenerator(num, Vector3(0.f, -300.f, 0.f));
 
     /* Initialize the Engine */
