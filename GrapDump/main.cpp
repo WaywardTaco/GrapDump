@@ -57,24 +57,24 @@ int main(void){
 
     /* Object Declarations */
     OrthoCamera* orthoCam = new OrthoCamera();
-    orthoCam->setPosition(glm::vec3(0.f, 0.f, 350.f));
-    orthoCam->setProjection(glm::ortho( - 350.f, 350.f, -350.f, 350.f, 0.1f, 700.f));    
+    orthoCam->setPosition(glm::vec3(0.f, 0.f, 400.f));
+    orthoCam->setProjection(glm::ortho( - 400.f, 400.f, -400.f, 400.f, 0.1f, 800.f));    
     
     PerspectiveCamera* perspectiveCam = new PerspectiveCamera();
-    perspectiveCam->setPosition(glm::vec3(0.f, 0.f, 350.f));
-    perspectiveCam->setProjection(glm::perspective(glm::radians(120.f), 1.f, 0.1f, 700.f));
+    perspectiveCam->setPosition(glm::vec3(0.f, -100.f, 400.f));
+    perspectiveCam->setProjection(glm::perspective(glm::radians(120.f), 1.f, 0.1f, 800.f));
     
-    Window* window = new Window("PC01 Josiah Aviso & Dun Baniqued", 700, 700);
+    Window* window = new Window("Group 3 - Josiah Aviso & Dun Baniqued", 800, 800);
     PhysicsWorld* world = new PhysicsWorld();
     
     int num;
     std::cout << "Enter Limit: "; std::cin >> num;
-    ParticleGenerator* generator = new ParticleGenerator(num);
+    ParticleGenerator* generator = new ParticleGenerator(num, Vector3(0.f, -300.f, 0.f));
 
     GameEngine* engine = new GameEngine(
         window,
         world,
-        orthoCam,
+        perspectiveCam,
         new Shader("Shader/sample.vert", "Shader/sample.frag"),
         generator);
 
