@@ -35,3 +35,8 @@ void RenderParticle::Render(Shader* shader){
 Particle* RenderParticle::Base(){
     return this->particle;
 }
+
+void RenderParticle::SetRadius(double radius){
+    this->particle->radius = radius;
+    this->model->setScale(radius);
+}

@@ -209,6 +209,9 @@
     <ClInclude Include="Engine\Physics\Links\Rod.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\GameObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Shader\sample.frag" />

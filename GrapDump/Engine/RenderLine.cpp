@@ -3,13 +3,13 @@
 
 using namespace Engine;
 
-void RenderLine::Update(Vector3 p1, Vector3 p2, glm::mat4 projection){
+void RenderLine::Update(double deltaTime){
     this->p1 = p1;
     this->p2 = p2;
-    this->projectionMat = projection;
+    this->projectionMat = this->projectionMat;
 }
 
-void RenderLine::Draw(){
+void RenderLine::Render(Shader* shader){
     glUseProgram(0);
 
     glm::vec4 d1 = this->projectionMat * glm::vec4 (

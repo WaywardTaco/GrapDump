@@ -13,6 +13,8 @@
 #include "Physics/RenderParticle.hpp"
 #include "Physics/LifespanParticle.hpp"
 #include "ParticleGenerator.hpp"
+#include "GameObject.hpp"
+#include "RenderLine.hpp"
 
 namespace Engine {
     using namespace std::chrono_literals;
@@ -22,23 +24,36 @@ namespace Engine {
             /* Tracker for physics pausing */
             bool isPhysicsPaused;
 
-            /* Objects to be registered in the engine */
+            /* Key Systems / Objects */
             Window* render_window;
             PhysicsWorld* physics_engine;
-            Camera* main_camera;
-            Camera* ortho_camera;
-            Camera* perspective_camera;
-            ParticleGenerator* particle_generator = NULL;
+            Camera* active_camera;
+
+            /* Objects to registered in the engine */
             std::unordered_map<std::string, Shader*> registered_shaders;
+            std::unordered_map<std::string, Camera*> registered_cameras;
+            std::unordered_map<std::string, GameObject*> registered_objects;
+
+            std::list<RenderLine*> render_lines;
             std::list<RenderParticle*> render_particles;
 
         public:
             /* Constructor requiring relevant objects */
-            GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Camera* orthoCam, Camera* perspectiveCam, Shader* mainShader, ParticleGenerator* particleGenerator);
+            GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Shader* mainShader);
             ~GameEngine();
 
             void Run();
-            void RegisterParticle(LifespanParticle* particle);
+
+            void setActiveCamera(std::string camera_name);
+
+            void Register(Shader* shader, std::string name);
+            void Register(Camera* camera, std::string name);
+            void Register(GameObject* object, std::string name);
+            void Register(RenderParticle* particle);
+            void Register(ForceGenerator* forceGenerator, RenderParticle* particle);
+            void Register(ParticleLink* link);
+            void Register(RenderLine* renderLine);
+
             void RemoveParticle(RenderParticle* particle);
 
         private:
@@ -48,11 +63,8 @@ namespace Engine {
             void UpdateObjects(double deltaTime);
 
             /* Utility functions for internal logic */
-            void RegisterShader(std::string shader_name, Shader* shader);
-            void RegisterParticle(Particle* particle);
-            void RegisterParticle(RenderParticle* particle);
-
             Shader* getShader(std::string shaderName);
+            Camera* getCamera(std::string cameraName);
     };
 
     /* Callback function for key input */

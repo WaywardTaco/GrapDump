@@ -23,5 +23,7 @@ namespace Physics {
             void Update(double deltaTime);
             void Render(Shader* shader);
             Particle* Base();
+
+            void SetRadius(double radius);
     };
 }

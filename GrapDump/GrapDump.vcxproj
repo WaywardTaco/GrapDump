@@ -173,6 +173,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\GameObject.hpp" />
     <ClInclude Include="Engine\Physics\Links\ParticleLink.hpp" />
     <ClInclude Include="Engine\Physics\Links\Rod.hpp" />
     <ClInclude Include="Engine\Physics\Springs\AnchoredSpring.hpp" />

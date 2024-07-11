@@ -4,14 +4,15 @@
 
 using namespace Physics;
 
-Particle::Particle(double mass = 1.0f) :
+Particle::Particle(double mass = 1.0f, bool hasGravity) :
     damping(0.9f),
     mass(mass),
     position(Vector3(0.f, 0.f, 0.f)), 
     velocity(Vector3(0.f, 0.f, 0.f)),
     acceleration(Vector3(0.f, 0.f, 0.f)),
     accumulatedForce(Vector3(0.f, 0.f, 0.f)),
-    lifespan(rand() % 10 + 1),
+    lifespan(999999999.f),
+    hasGravity(hasGravity),
     destroyed(false){}
 
 void Particle::UpdatePosition(double deltaTime){
