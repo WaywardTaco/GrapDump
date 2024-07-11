@@ -66,6 +66,9 @@ int main(void){
     std::cout << "Enter Particle Limit: "; std::cin >> num;
     ParticleGenerator* generator = new ParticleGenerator(num, Vector3(0.f, -300.f, 0.f));
 
+    // TODO : RenderLine line = RenderLine();
+
+
     /* Initialize the Engine */
     GameEngine* engine = new GameEngine(
         window,

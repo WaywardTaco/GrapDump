@@ -3,6 +3,15 @@
 
 using namespace Physics;
 
+void PhysicsWorld::GenerateContacts(){
+    contacts.clear();
+    for(std::list<ParticleLink*>::iterator itr = links.begin(); itr != links.end(); itr++){
+        ParticleContact* contact = (*itr)->GetContact();
+        if(contact != nullptr)
+            contacts.push_back(contact);
+    }
+}
+
 void PhysicsWorld::AddParticle(Particle* particle){
     this->particles.push_back(particle);
 
@@ -18,6 +27,11 @@ void PhysicsWorld::Update(float deltaTime){
     for (std::list<Particle*>::iterator itr = particles.begin(); itr != particles.end(); itr++) {
         (*itr)->Update(deltaTime);
     }
+
+    this->GenerateContacts();
+
+    if(contacts.size() > 0)
+        contactResolver.ResolveContacts(contacts, deltaTime);
 }
 
 void PhysicsWorld::ResetForces(){
@@ -25,6 +39,17 @@ void PhysicsWorld::ResetForces(){
     for (std::list<Particle*>::iterator itr = particles.begin(); itr != particles.end(); itr++) {
         (*itr)->ResetForce();
     }
+}
+
+void PhysicsWorld::AddContact(Particle* p1, Particle* p2, float restitution, Vector3 contactNormal){
+    ParticleContact* toAdd = new ParticleContact();
+
+    toAdd->particles[0] = p1;
+    toAdd->particles[1] = p2;
+    toAdd->restitution = restitution;
+    toAdd->contactNormal = contactNormal;
+
+    contacts.push_back(toAdd);
 }
 
 void PhysicsWorld::UpdateParticleList(){

@@ -139,6 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Physics\Links\ParticleLink.cpp" />
+    <ClCompile Include="Engine\Physics\Links\Rod.cpp" />
+    <ClCompile Include="Engine\Physics\Springs\AnchoredSpring.cpp" />
     <ClCompile Include="Engine\Cameras\Camera.cpp" />
     <ClCompile Include="Engine\Cameras\OrthoCamera.cpp" />
     <ClCompile Include="Engine\Cameras\PerspectiveCamera.cpp" />
@@ -150,14 +153,18 @@
     <ClCompile Include="Engine\Lights\SpotLight.cpp" />
     <ClCompile Include="Engine\Model.cpp" />
     <ClCompile Include="Engine\ParticleGenerator.cpp" />
+    <ClCompile Include="Engine\Physics\ContactResolver.cpp" />
     <ClCompile Include="Engine\Physics\ForceGenerator.cpp" />
     <ClCompile Include="Engine\Physics\ForceGenerators\DragForceGenerator.cpp" />
     <ClCompile Include="Engine\Physics\ForceGenerators\GravityForceGenerator.cpp" />
     <ClCompile Include="Engine\Physics\ForceRegistry.cpp" />
     <ClCompile Include="Engine\Physics\LifespanParticle.cpp" />
     <ClCompile Include="Engine\Physics\Particle.cpp" />
+    <ClCompile Include="Engine\Physics\ParticleContact.cpp" />
     <ClCompile Include="Engine\Physics\PhysicsWorld.cpp" />
     <ClCompile Include="Engine\Physics\RenderParticle.cpp" />
+    <ClCompile Include="Engine\Physics\Springs\ParticleSpring.cpp" />
+    <ClCompile Include="Engine\RenderLine.cpp" />
     <ClCompile Include="Engine\Shader.cpp" />
     <ClCompile Include="Engine\Skybox.cpp" />
     <ClCompile Include="Engine\Vector3.cpp" />
@@ -166,6 +173,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Physics\Links\ParticleLink.hpp" />
+    <ClInclude Include="Engine\Physics\Links\Rod.hpp" />
+    <ClInclude Include="Engine\Physics\Springs\AnchoredSpring.hpp" />
     <ClInclude Include="Engine\Cameras\Camera.hpp" />
     <ClInclude Include="Engine\Cameras\OrthoCamera.hpp" />
     <ClInclude Include="Engine\Cameras\PerspectiveCamera.hpp" />
@@ -177,14 +187,18 @@
     <ClInclude Include="Engine\Lights\SpotLight.hpp" />
     <ClInclude Include="Engine\Model.hpp" />
     <ClInclude Include="Engine\ParticleGenerator.hpp" />
+    <ClInclude Include="Engine\Physics\ContactResolver.hpp" />
     <ClInclude Include="Engine\Physics\ForceGenerator.hpp" />
     <ClInclude Include="Engine\Physics\ForceGenerators\DragForceGenerator.hpp" />
     <ClInclude Include="Engine\Physics\ForceGenerators\GravityForceGenerator.hpp" />
     <ClInclude Include="Engine\Physics\ForceRegistry.hpp" />
     <ClInclude Include="Engine\Physics\LifespanParticle.hpp" />
     <ClInclude Include="Engine\Physics\Particle.hpp" />
+    <ClInclude Include="Engine\Physics\ParticleContact.hpp" />
     <ClInclude Include="Engine\Physics\PhysicsWorld.hpp" />
     <ClInclude Include="Engine\Physics\RenderParticle.hpp" />
+    <ClInclude Include="Engine\Physics\Springs\ParticleSpring.hpp" />
+    <ClInclude Include="Engine\RenderLine.hpp" />
     <ClInclude Include="Engine\Shader.hpp" />
     <ClInclude Include="Engine\Skybox.hpp" />
     <ClInclude Include="Engine\Vector3.hpp" />
