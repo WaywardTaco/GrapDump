@@ -121,7 +121,7 @@ void GameEngine::Register(ParticleLink* link){
 
 void GameEngine::Register(RenderLine* renderLine){
     /* RenderLines are in a list to be rendered */
-    
+    this->render_lines.push_back(renderLine);
 }
 
 void GameEngine::Update(double deltaTime){
@@ -183,6 +183,9 @@ void GameEngine::Render(){
     /* Rendering all registered particles to the main window */
     for(RenderParticle* particle : this->render_particles) 
         particle->Render(this->getShader("_mainShader"));
+
+    for(RenderLine* line : this->render_lines)
+        line->Render(this->getShader("_mainShader"), this->active_camera);
 
     /* Updating to the next frame of the window */
     this->render_window->Update();

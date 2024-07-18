@@ -43,6 +43,8 @@
 #include "Engine/Physics/ForceGenerators/DragForceGenerator.hpp"
 #include "Engine/RenderLine.hpp"
 #include "Engine/Physics/Springs/AnchoredSpring.hpp"
+#include "Engine/Physics/Springs/AnchoredBungee.hpp"
+#include "Engine/Physics/Links/Chain.hpp"
 
 using namespace Physics;
 using namespace Engine;
@@ -50,7 +52,7 @@ using namespace Engine;
 int main(void){
 
     /* Initialize the Engine */
-    Window* window = new Window("MP Phase 1 Group 3 - Josiah Aviso & Dun Baniqued", 800, 800);
+    Window* window = new Window("Quiz Josiah Kurt B. Aviso", 800, 800);
     PhysicsWorld* world = new PhysicsWorld();
     GameEngine* engine = new GameEngine(
         window, world, new Shader("Shader/sample.vert", "Shader/sample.frag"));
@@ -74,17 +76,17 @@ int main(void){
     // ParticleGenerator* generator = new ParticleGenerator(num, Vector3(0.f, -300.f, 0.f));
 
     Model* particleModel = new Model("3D/sphere.obj", glm::vec3(0.f, 0.f, 0.f));
-    RenderParticle* particle1 = new RenderParticle(new Particle(10.f, true), particleModel, Vector3(1.f, 0.f, 0.f));
+    RenderParticle* particle1 = new RenderParticle(new Particle(50.f, true), particleModel, Vector3(1.f, 0.f, 0.f));
     particle1->SetRadius(50.f);
-    particle1->Base()->position = Vector3(-150.f, -150.f, 0.f);
+    particle1->Base()->position = Vector3(-150.f, 0.f, 0.f);
 
-    RenderParticle* particle2 = new RenderParticle(new Particle(10.f, false), particleModel, Vector3(0.f, 1.f, 0.f));
-    particle2->SetRadius(50.f);
+    RenderParticle* particle2 = new RenderParticle(new Particle(50.f, false), particleModel, Vector3(0.f, 1.f, 0.f));
+    particle2->SetRadius(0.1f);
     particle2->Base()->position = Vector3(150.f, 150.f, 0.f);
 
-    RenderParticle* particle3 = new RenderParticle(new Particle(10.f, true), particleModel, Vector3(0.f, 0.f, 1.f));
+    RenderParticle* particle3 = new RenderParticle(new Particle(50.f, true), particleModel, Vector3(0.f, 0.f, 1.f));
     particle3->SetRadius(50.f);
-    particle3->Base()->position = Vector3(150.f, -150.f, 0.f);
+    particle3->Base()->position = Vector3(150.f, 0.f, 0.f);
 
     //world->AddParticle(particle1);
     //world->AttachToSpring(particle1);
@@ -93,15 +95,26 @@ int main(void){
     engine->Register(particle2);
     engine->Register(particle3);
 
-    AnchoredSpring spring = AnchoredSpring(Vector3(-150.f, 150.f, 0.f), 0.3f, 100.f);
-    engine->Register(&spring, particle1);
+    AnchoredBungee bungee = AnchoredBungee(Vector3(-150.f, 150.f, 0.f), 2.f, 100.f);
+    engine->Register(&bungee, particle1);
 
-    Rod rod = Rod();
+    Chain rod = Chain();
     rod.length = 300.f;
     rod.particles[0] = particle2->Base();
     rod.particles[1] = particle3->Base();
     engine->Register(&rod);
 
+    RenderLine* line1 = new RenderLine(
+        new Vector3(-150.f, 150.f, 0.f), 
+        &(particle1->Base()->position), 
+        Vector3(1.f, 1.f, 0.f));
+    RenderLine* line2 = new RenderLine(
+        &(particle2->Base()->position),
+        &(particle3->Base()->position), 
+        Vector3(0.f, 1.f, 1.f));
+
+    engine->Register(line1);
+    engine->Register(line2);
 
     /* Run the Engine */
     engine->Run();

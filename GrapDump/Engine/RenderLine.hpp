@@ -4,19 +4,19 @@
 #include <glm/glm.hpp>
 #include <glad/glad.h>
 #include "Vector3.hpp"
-#include "GameObject.hpp"
+#include "Cameras/Camera.hpp"
 
 namespace Engine{
-    class RenderLine : public GameObject {
+    class RenderLine {
         private:
-            Vector3 p1, p2, color;
-            glm::mat4 projectionMat;
+            Vector3 *p1, *p2, color;
+            
 
         public:
-            RenderLine(Vector3 p1, Vector3 p2, glm::mat4 projection, Vector3 color) :
-                p1(p1), p2(p2), color(color), projectionMat(projection) {};
+            RenderLine(Vector3* p1, Vector3* p2, Vector3 color) :
+                p1(p1), p2(p2), color(color) {};
 
             void Update(double deltaTime);
-            void Render(Shader* shader);
+            void Render(Shader* shader, Camera* camera);
     };
 }

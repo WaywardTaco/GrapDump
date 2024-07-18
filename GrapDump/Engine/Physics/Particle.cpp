@@ -11,7 +11,7 @@ Particle::Particle(double mass = 1.0f, bool hasGravity) :
     velocity(Vector3(0.f, 0.f, 0.f)),
     acceleration(Vector3(0.f, 0.f, 0.f)),
     accumulatedForce(Vector3(0.f, 0.f, 0.f)),
-    lifespan(999999999.f),
+    lifespan(-1.f),
     hasGravity(hasGravity),
     destroyed(false){}
 
@@ -29,6 +29,8 @@ void Particle::UpdateVelocity(double deltaTime){
 }
 
 void Particle::UpdateLifespan(double deltaTime) {
+    if (this->lifespan == -1.f) return;
+    
     /* Lifespan deterioration */
     this->lifespan -= deltaTime;
     if (lifespan <= 0) this->Destroy();

@@ -16,4 +16,6 @@ void ParticleSpring::UpdateForce(Particle* particle, double deltaTime){
 
     force = force.normalize();
     force = force * springForce;
+    
+    particle->AddForce(force);
 }

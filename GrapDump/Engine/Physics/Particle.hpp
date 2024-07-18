@@ -15,7 +15,7 @@ namespace Physics {
     class Particle {
         public:
             double damping;
-            double lifespan = 999999999999.f;
+            double lifespan = -1.f;
 
             double mass = 1.f;
             double radius = 1.f;

@@ -38,6 +38,7 @@ namespace Engine {
 			void setProjection(glm::mat4 projection);
 			void setWorldUp(glm::vec3 worldUp);
 
+			glm::mat4 getProjection();
 			glm::mat4 getViewMat();
 			glm::vec3 getCenter();
 	};

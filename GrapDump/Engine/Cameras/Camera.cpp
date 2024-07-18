@@ -119,6 +119,10 @@ void Camera::setWorldUp(glm::vec3 worldUp) {
     this->_worldUp = worldUp;
 }
 
+glm::mat4 Camera::getProjection(){
+    return this->_projection;
+}
+
 glm::mat4 Camera::getViewMat() {
     return glm::lookAt(this->_position, this->_center, this->_worldUp);
 }

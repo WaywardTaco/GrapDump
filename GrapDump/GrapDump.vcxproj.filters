@@ -111,6 +111,12 @@
     <ClCompile Include="Engine\Physics\Links\Rod.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Physics\Springs\AnchoredBungee.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Links\Chain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tiny_obj_loader.h">
@@ -210,6 +216,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine\GameObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Springs\AnchoredBungee.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Links\Chain.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

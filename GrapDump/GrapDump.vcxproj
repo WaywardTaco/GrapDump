@@ -139,8 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Physics\Links\Chain.cpp" />
     <ClCompile Include="Engine\Physics\Links\ParticleLink.cpp" />
     <ClCompile Include="Engine\Physics\Links\Rod.cpp" />
+    <ClCompile Include="Engine\Physics\Springs\AnchoredBungee.cpp" />
     <ClCompile Include="Engine\Physics\Springs\AnchoredSpring.cpp" />
     <ClCompile Include="Engine\Cameras\Camera.cpp" />
     <ClCompile Include="Engine\Cameras\OrthoCamera.cpp" />
@@ -174,8 +176,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\GameObject.hpp" />
+    <ClInclude Include="Engine\Physics\Links\Chain.hpp" />
     <ClInclude Include="Engine\Physics\Links\ParticleLink.hpp" />
     <ClInclude Include="Engine\Physics\Links\Rod.hpp" />
+    <ClInclude Include="Engine\Physics\Springs\AnchoredBungee.hpp" />
     <ClInclude Include="Engine\Physics\Springs\AnchoredSpring.hpp" />
     <ClInclude Include="Engine\Cameras\Camera.hpp" />
     <ClInclude Include="Engine\Cameras\OrthoCamera.hpp" />
