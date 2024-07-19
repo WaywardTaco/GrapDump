@@ -12,15 +12,29 @@ void RenderLine::Update(double deltaTime){
 void RenderLine::Render(Shader* shader, Camera* camera){
 
     glUseProgram(0);
-
-    glm::vec4 d1 = camera->getProjection() * glm::vec4 (
+    
+    glm::vec4 d1 = camera->getProjection() * camera->getViewMat() *  glm::vec4 (
         p1->x, p1->y, p1->z, 0.0f
     );
-    glm::vec4 d2 = camera->getProjection() * glm::vec4 (
+    glm::vec4 d2 = camera->getProjection() * camera->getViewMat() * glm::vec4 (
         p2->x, p2->y, p2->z, 0.0f
     );
+    
+    float mag = sqrt(d1.x * d1.x + d1.y * d1.y + d1.z * d1.z);
 
-     shader->use();
+    d1.x /= mag;
+    d1.y /= mag;
+    d1.z /= mag;
+
+    mag = sqrt(d2.x * d2.x + d2.y * d2.y + d2.z * d2.z);
+
+    d2.x /= mag;
+    d2.y /= mag;
+    d2.z /= mag;
+
+    std::cout << "" << std::endl;
+
+    shader->use();
     glUseProgram(0);
     glBegin(GL_LINES);
     glColor3f(color.x, color.y, color.z);
