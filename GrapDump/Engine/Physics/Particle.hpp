@@ -19,7 +19,7 @@ namespace Physics {
 
             double mass = 1.f;
             double radius = 1.f;
-            double restitution = 1.f;
+            double restitution = 0.9f;
 
             Vector3 position;
             Vector3 velocity;

@@ -117,6 +117,9 @@
     <ClCompile Include="Engine\Physics\Links\Chain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Physics\Links\AnchoredChain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tiny_obj_loader.h">
@@ -222,6 +225,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Physics\Links\Chain.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Links\AnchoredChain.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

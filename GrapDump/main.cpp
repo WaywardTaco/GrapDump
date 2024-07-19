@@ -45,76 +45,86 @@
 #include "Engine/Physics/Springs/AnchoredSpring.hpp"
 #include "Engine/Physics/Springs/AnchoredBungee.hpp"
 #include "Engine/Physics/Links/Chain.hpp"
+#include "Engine/Physics/Links/AnchoredChain.hpp"
 
 using namespace Physics;
 using namespace Engine;
 
 int main(void){
 
+    /* Setup Variables */
+    const float 
+        particle_mass = 50.f,
+        particle_start_z = 0.f;
+    const int total_particles = 5;
+
+    /* Asking User Input */
+    float cable_length, particle_gap, particle_rad, grav_strength, force_x, force_y, force_z;
+    std::cout << "Cable Length: "; std::cin >> cable_length;
+    std::cout << "Particle Gap: "; std::cin >> particle_gap;
+    std::cout << "Particle Radius: "; std::cin >> particle_rad;
+    std::cout << "Gravity Strength: "; std::cin >> grav_strength;
+    std::cout << "Apply Force" << std::endl;
+    std::cout << "x: "; std::cin >> force_x;
+    std::cout << "y: "; std::cin >> force_y;
+    std::cout << "z: "; std::cin >> force_z;
+
     /* Initialize the Engine */
-    Window* window = new Window("Quiz Josiah Kurt B. Aviso", 800, 800);
-    PhysicsWorld* world = new PhysicsWorld();
+    Window* window = new Window("DynaBox", 800, 800);
+    PhysicsWorld* world = new PhysicsWorld(Vector3(0.f, grav_strength, 0.f));
     GameEngine* engine = new GameEngine(
         window, world, new Shader("Shader/sample.vert", "Shader/sample.frag"));
 
     /* Scene Setup */
     OrthoCamera* orthoCam = new OrthoCamera();
     orthoCam->setPosition(glm::vec3(0.f, 0.f, 400.f));
-    orthoCam->setProjection(glm::ortho( - 400.f, 400.f, -400.f, 400.f, 0.1f, 800.f)); 
+    orthoCam->setProjection(glm::ortho( - 400.f, 400.f, -400.f, 400.f, 0.1f, 1200.f)); 
     orthoCam->setCenter(glm::vec3(0.f, 0.f, 0.f));
     engine->Register(orthoCam, "orthoCam");
     engine->setActiveCamera("orthoCam");
     
     PerspectiveCamera* perspectiveCam = new PerspectiveCamera();
     perspectiveCam->setPosition(glm::vec3(0.f, -100.f, 400.f));
-    perspectiveCam->setProjection(glm::perspective(glm::radians(120.f), 1.f, 0.1f, 800.f));
+    perspectiveCam->setProjection(glm::perspective(glm::radians(120.f), 1.f, 0.1f, 1200.f));
     perspectiveCam->setCenter(glm::vec3(0.f, 0.f, 0.f));
-    
-    /* User Input for particle limit */
-    // int num;
-    // std::cout << "Enter Particle Limit: "; std::cin >> num;
-    // ParticleGenerator* generator = new ParticleGenerator(num, Vector3(0.f, -300.f, 0.f));
+    engine->Register(perspectiveCam, "perspectiveCam");
 
     Model* particleModel = new Model("3D/sphere.obj", glm::vec3(0.f, 0.f, 0.f));
-    RenderParticle* particle1 = new RenderParticle(new Particle(50.f, true), particleModel, Vector3(1.f, 0.f, 0.f));
-    particle1->SetRadius(50.f);
-    particle1->Base()->position = Vector3(-150.f, 0.f, 0.f);
 
-    RenderParticle* particle2 = new RenderParticle(new Particle(50.f, false), particleModel, Vector3(0.f, 1.f, 0.f));
-    particle2->SetRadius(0.1f);
-    particle2->Base()->position = Vector3(150.f, 150.f, 0.f);
+    float startPos = -(((total_particles - 1) / 2.f) * particle_gap);
 
-    RenderParticle* particle3 = new RenderParticle(new Particle(50.f, true), particleModel, Vector3(0.f, 0.f, 1.f));
-    particle3->SetRadius(50.f);
-    particle3->Base()->position = Vector3(150.f, 0.f, 0.f);
+    for (int i = 0; i < total_particles; i++) {
 
-    //world->AddParticle(particle1);
-    //world->AttachToSpring(particle1);
+        RenderParticle* particle = new RenderParticle(new Particle(particle_mass, true), particleModel, Vector3(1.f, 0.f, 0.f));
+        particle->SetRadius(particle_rad);
+        particle->Base()->position = Vector3(startPos + particle_gap * i, 0.f, particle_start_z);
 
-    engine->Register(particle1);
-    engine->Register(particle2);
-    engine->Register(particle3);
+        if (i == 0) {
+            Vector3* startForce = new Vector3(force_x, force_y, force_z);
+            engine->passInfo(particle->Base(), startForce);
+        }
 
-    AnchoredBungee bungee = AnchoredBungee(Vector3(-150.f, 150.f, 0.f), 2.f, 100.f);
-    engine->Register(&bungee, particle1);
+        AnchoredChain* chain = new AnchoredChain();
+        chain->length = cable_length;
+        chain->anchorPoint = new Vector3(startPos + particle_gap * i, cable_length / 2.f, particle_start_z);
+        chain->particles[0] = particle->Base();
 
-    Chain rod = Chain();
-    rod.length = 300.f;
-    rod.particles[0] = particle2->Base();
-    rod.particles[1] = particle3->Base();
-    engine->Register(&rod);
+        engine->Register(particle);
+        engine->Register(chain);
+    }
 
-    RenderLine* line1 = new RenderLine(
-        new Vector3(-150.f, 150.f, 0.f), 
-        &(particle1->Base()->position), 
-        Vector3(1.f, 1.f, 0.f));
-    RenderLine* line2 = new RenderLine(
-        &(particle2->Base()->position),
-        &(particle3->Base()->position), 
-        Vector3(0.f, 1.f, 1.f));
 
-    engine->Register(line1);
-    engine->Register(line2);
+    // RenderLine* line1 = new RenderLine(
+       // new Vector3(-150.f, 150.f, 0.f), 
+       // &(particle1->Base()->position), 
+       // Vector3(1.f, 1.f, 0.f));
+    // RenderLine* line2 = new RenderLine(
+       // &(particle2->Base()->position),
+       // &(particle3->Base()->position), 
+       // Vector3(0.f, 1.f, 1.f));
+
+    // engine->Register(line1);
+    // engine->Register(line2);
 
     /* Run the Engine */
     engine->Run();

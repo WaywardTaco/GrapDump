@@ -3,6 +3,9 @@
 
 using namespace Physics;
 
+PhysicsWorld::PhysicsWorld(Vector3 gravity_vector) :
+    Gravity(gravity_vector){}
+
 void PhysicsWorld::GenerateContacts(){
     contacts.clear();
 

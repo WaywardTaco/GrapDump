@@ -25,9 +25,11 @@ namespace Physics {
             void GetOverlaps();
 
         private:
-            GravityForceGenerator Gravity = GravityForceGenerator(Vector3(0.f, -9.8f, 0.f));
+            GravityForceGenerator Gravity;
             
         public:
+            PhysicsWorld(Vector3 gravity_vector = Vector3(0.f, -9.8f, 0.f));
+
             void AddParticle(Particle* particle);
             void Update(float deltaTime);
             void ResetForces();

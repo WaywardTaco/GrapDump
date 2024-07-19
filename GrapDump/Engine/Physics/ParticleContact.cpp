@@ -64,6 +64,6 @@ void ParticleContact::ResolveVelocity(double deltaTime){
 
     if(particles[1]){
         Vector3 V_b = Impulse * -((float) 1 / particles[1]->mass);
-        particles[0]->velocity += V_b;
+        particles[1]->velocity += V_b;
     }
 }

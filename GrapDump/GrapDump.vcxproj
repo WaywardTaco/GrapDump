@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Physics\Links\AnchoredChain.cpp" />
     <ClCompile Include="Engine\Physics\Links\Chain.cpp" />
     <ClCompile Include="Engine\Physics\Links\ParticleLink.cpp" />
     <ClCompile Include="Engine\Physics\Links\Rod.cpp" />
@@ -176,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\GameObject.hpp" />
+    <ClInclude Include="Engine\Physics\Links\AnchoredChain.hpp" />
     <ClInclude Include="Engine\Physics\Links\Chain.hpp" />
     <ClInclude Include="Engine\Physics\Links\ParticleLink.hpp" />
     <ClInclude Include="Engine\Physics\Links\Rod.hpp" />

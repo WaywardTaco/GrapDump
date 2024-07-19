@@ -72,9 +72,10 @@ void GameEngine::Run(){
             curr_ns -= curr_ns;
             
             this->Update(ms.count() / 1000.f);
+
+            /* Clearing of Forces after updates if unpaused */
+            this->physics_engine->ResetForces();
         }
-        /* Clearing of Forces after updates */
-        this->physics_engine->ResetForces();
 
         /* Rendering */
         this->Render();
@@ -85,6 +86,7 @@ void GameEngine::Run(){
 }
 
 void GameEngine::setActiveCamera(std::string camera_name){
+    if(this->registered_cameras.count(camera_name) > 0)
     this->active_camera = this->registered_cameras[camera_name];
 }
 
@@ -125,52 +127,44 @@ void GameEngine::Register(RenderLine* renderLine){
 }
 
 void GameEngine::Update(double deltaTime){
-
-    /* Creates new particles via particle generator if able */
-    // if (particle_generator != NULL) {
-    //     int limit = particle_generator->toLimit(this->physics_engine->particles.size());
-    //     for (int i = 0; i < limit; i++) 
-    //         this->RegisterParticle(this->particle_generator->GenerateLifespanParticle());
-    // }
+    /* Updates all registered objects */
+    this->UpdateObjects(deltaTime);
 
     /* Skips later physics computations */
     if(!this->isPhysicsPaused)
         /* Physics updates */
         this->physics_engine->Update(deltaTime);
-
-    /* Updates all registered objects */
-    this->UpdateObjects(deltaTime);
-    
 }
 
 void GameEngine::UpdateObjects(double deltaTime){
     float camRotationAngle = 5.f;
 
     /* Updates physics pausing */
-    if(InputSystem::Instance()->key_Space){
-        this->isPhysicsPaused = !this->isPhysicsPaused;
-        InputSystem::Instance()->key_Space = false;
+    if(InputSystem::Instance()->key_Space && !this->wasStarted){
+        this->wasStarted = true;
+
+        firstParticle->AddForce(*startForce);
     }
 
-    // /* Camera switching */
-    // if(InputSystem::Instance()->key_1)
-    //     this->main_camera = this->ortho_camera;
-    // if(InputSystem::Instance()->key_2)
-    //     this->main_camera = this->perspective_camera;
+    /* Camera switching */
+    if(InputSystem::Instance()->key_1)
+        this->setActiveCamera("orthoCam");
+    if(InputSystem::Instance()->key_2)
+        this->setActiveCamera("perspectiveCam");
 
-    // /* Camera movement */
-    // if(InputSystem::Instance()->key_W){
-    //     this->main_camera->rotateAroundLocal((glm::vec3)Vector3(0.f,0.f,0.f), camRotationAngle, (glm::vec3)Vector3(1.f,0.f,0.f));
-    // }
-    // if(InputSystem::Instance()->key_S){
-    //     this->main_camera->rotateAroundLocal((glm::vec3)Vector3(0.f,0.f,0.f), -camRotationAngle, (glm::vec3)Vector3(1.f,0.f,0.f));
-    // }
-    // if(InputSystem::Instance()->key_A){
-    //     this->main_camera->rotateAround((glm::vec3)Vector3(0.f,0.f,0.f), -camRotationAngle, (glm::vec3)Vector3(0.f,1.f,0.f));
-    // }
-    // if(InputSystem::Instance()->key_D){
-    //     this->main_camera->rotateAround((glm::vec3)Vector3(0.f,0.f,0.f), camRotationAngle, (glm::vec3)Vector3(0.f,1.f,0.f));
-    // }
+    /* Camera movement */
+    if(InputSystem::Instance()->key_W){
+        this->active_camera->rotateAroundLocal((glm::vec3)Vector3(0.f,0.f,0.f), camRotationAngle, (glm::vec3)Vector3(1.f,0.f,0.f));
+    }
+    if(InputSystem::Instance()->key_S){
+        this->active_camera->rotateAroundLocal((glm::vec3)Vector3(0.f,0.f,0.f), -camRotationAngle, (glm::vec3)Vector3(1.f,0.f,0.f));
+    }
+    if(InputSystem::Instance()->key_A){
+        this->active_camera->rotateAround((glm::vec3)Vector3(0.f,0.f,0.f), -camRotationAngle, (glm::vec3)Vector3(0.f,1.f,0.f));
+    }
+    if(InputSystem::Instance()->key_D){
+        this->active_camera->rotateAround((glm::vec3)Vector3(0.f,0.f,0.f), camRotationAngle, (glm::vec3)Vector3(0.f,1.f,0.f));
+    }
 
 }
 
@@ -241,4 +235,10 @@ void Engine::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
             InputSystem::Instance()->key_Space = isPressed;
             break;
     }   
+}
+
+/* For simulation start on space press */
+void GameEngine::passInfo(Particle* firstParticle, Vector3* startForce) {
+    this->firstParticle = firstParticle;
+    this->startForce = startForce;
 }

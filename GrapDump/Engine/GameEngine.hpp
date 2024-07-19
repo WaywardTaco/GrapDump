@@ -37,6 +37,11 @@ namespace Engine {
             std::list<RenderLine*> render_lines;
             std::list<RenderParticle*> render_particles;
 
+            /* For simulation start on space press */
+            Particle* firstParticle;
+            Vector3* startForce;
+            bool wasStarted = false;
+
         public:
             /* Constructor requiring relevant objects */
             GameEngine(Window* renderWindow, PhysicsWorld* physicsEngine, Shader* mainShader);
@@ -46,6 +51,7 @@ namespace Engine {
 
             void setActiveCamera(std::string camera_name);
 
+            /* Registration of objects */
             void Register(Shader* shader, std::string name);
             void Register(Camera* camera, std::string name);
             void Register(GameObject* object, std::string name);
@@ -55,6 +61,9 @@ namespace Engine {
             void Register(RenderLine* renderLine);
 
             void RemoveParticle(RenderParticle* particle);
+
+            /* For simulation start on space press */
+            void passInfo(Particle* firstParticle, Vector3* startForce);
 
         private:
             /* Gameloop utility functions */
