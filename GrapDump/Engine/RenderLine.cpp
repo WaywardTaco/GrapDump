@@ -20,8 +20,9 @@ void RenderLine::Render(Shader* shader, Camera* camera){
     glm::vec4 d2 = camera->getProjection() * glm::vec4 (
         p2->x, p2->y, p2->z, 1.0f
     );
-    std::cout << "Rendering: " << 
-        d2.x << ", " << d2.y << ", " << d2.z << std::endl;
+    std::cout << this << ": [" << 
+        p1->x << ", " << p1->y << ", " << p1->z << "], [" <<
+        p2->x << ", " << p2->y << ", " << p2->z << "]" << std::endl;
 
     // shader->use();
     glUseProgram(0);

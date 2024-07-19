@@ -92,7 +92,6 @@ int main(void){
     Model* particleModel = new Model("3D/sphere.obj", glm::vec3(0.f, 0.f, 0.f));
 
     float startPos = -(((total_particles - 1) / 2.f) * particle_gap);
-
     for (int i = 0; i < total_particles; i++) {
 
         RenderParticle* particle = new RenderParticle(new Particle(particle_mass, true), particleModel, Vector3(1.f, 0.f, 0.f));
@@ -109,22 +108,15 @@ int main(void){
         chain->anchorPoint = new Vector3(startPos + particle_gap * i, cable_length / 2.f, particle_start_z);
         chain->particles[0] = particle->Base();
 
+        RenderLine* line = new RenderLine(
+            chain->anchorPoint, 
+            &(particle->Base()->position), 
+            Vector3(1.f, 1.f, 1.f));
+
         engine->Register(particle);
         engine->Register(chain);
+        engine->Register(line);
     }
-
-
-    // RenderLine* line1 = new RenderLine(
-       // new Vector3(-150.f, 150.f, 0.f), 
-       // &(particle1->Base()->position), 
-       // Vector3(1.f, 1.f, 0.f));
-    // RenderLine* line2 = new RenderLine(
-       // &(particle2->Base()->position),
-       // &(particle3->Base()->position), 
-       // Vector3(0.f, 1.f, 1.f));
-
-    // engine->Register(line1);
-    // engine->Register(line2);
 
     /* Run the Engine */
     engine->Run();
