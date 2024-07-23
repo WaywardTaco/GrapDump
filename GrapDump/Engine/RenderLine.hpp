@@ -17,6 +17,6 @@ namespace Engine{
                 p1(p1), p2(p2), color(color) {};
 
             void Update(double deltaTime);
-            void Render(Shader* shader, Camera* camera);
+            void Render(Shader* shader, Camera* camera, bool isOrtho);
     };
 }

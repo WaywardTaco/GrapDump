@@ -178,8 +178,9 @@ void GameEngine::Render(){
     for(RenderParticle* particle : this->render_particles) 
         particle->Render(this->getShader("_mainShader"));
 
+    bool isUsingOrtho = this->active_camera == this->getCamera("orthoCam");
     for(RenderLine* line : this->render_lines)
-        line->Render(this->getShader("_mainShader"), this->active_camera);
+        line->Render(this->getShader("_mainShader"), this->active_camera, isUsingOrtho);
 
     /* Updating to the next frame of the window */
     this->render_window->Update();
