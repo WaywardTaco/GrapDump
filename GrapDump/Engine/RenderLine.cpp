@@ -22,8 +22,8 @@ void RenderLine::Render(Shader* shader, Camera* camera, bool isOrtho){
         glm::vec3(p2->x, p2->y, p2->z), 1.0f
     );
 
-    float max1 = glm::max(glm::max(d1.x, d1.y), d1.z);
-    float max2 = glm::max(glm::max(d2.x, d2.y), d2.z);
+    float max1 = glm::max(glm::max(glm::abs(d1.x), glm::abs(d1.y)), glm::abs(d1.z));
+    float max2 = glm::max(glm::max(glm::abs(d2.x), glm::abs(d2.y)), glm::abs(d2.z));
 
     if(isOrtho){
         max1 = 1;
